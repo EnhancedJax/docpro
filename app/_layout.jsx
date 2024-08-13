@@ -11,6 +11,9 @@ import {
 } from "@expo-google-fonts/ubuntu";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { ToastProvider } from "../components/toast";
+import { AuthProvider } from "../providers/auth";
+import QueryClientProvider from "../providers/QueryClientProvider";
 import "./global.css";
 
 SplashScreen.preventAutoHideAsync();
@@ -34,8 +37,15 @@ export default function RootLayout() {
   SplashScreen.hideAsync();
 
   return (
-    <Stack screenOptions={{ headerShown: false }}>
-      <Stack.Screen name="index" />
-    </Stack>
+    <ToastProvider>
+      <QueryClientProvider>
+        <AuthProvider>
+          <Stack screenOptions={{ headerShown: false }}>
+            <Stack.Screen name="index" />
+            <Stack.Screen name="login" />
+          </Stack>
+        </AuthProvider>
+      </QueryClientProvider>
+    </ToastProvider>
   );
 }

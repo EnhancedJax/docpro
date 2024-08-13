@@ -1,16 +1,24 @@
-import React from "react";
-import { SafeAreaView, View } from "react-native";
-import Text from "../components/Text";
+import { Redirect } from "expo-router";
+import { useEffect, useState } from "react";
+import { useAuthContext } from "../providers/auth";
 
 export default function Index() {
-  return (
-    <SafeAreaView className="h-full bg-white">
-      <View className="">
-        <Text twClass="text-red-500 text-2xl" bold>
-          Hello world
-        </Text>
-        <Text twClass="text-red-500 text-2xl ">Hello world</Text>
-      </View>
-    </SafeAreaView>
-  );
+  const { loginWithLastSession } = useAuthContext();
+  const [token, setToken] = useState(-1);
+
+  useEffect(() => {
+    loginWithLastSession().then((token) => {
+      setToken(token);
+    });
+  }, []);
+
+  if (token === -1) {
+    return null;
+  }
+
+  if (!token) {
+    return <Redirect href="/login" />;
+  }
+
+  return <Redirect href="/(app)/home" />;
 }

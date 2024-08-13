@@ -1,5 +1,7 @@
 import { Text as RNText } from "react-native";
 
+const defaultClasses = "text-text";
+
 export default function Text({ light, medium, bold, children, ...props }) {
   return (
     <RNText
@@ -12,7 +14,7 @@ export default function Text({ light, medium, bold, children, ...props }) {
           ? "Ubuntu_700Bold"
           : "Ubuntu_400Regular",
       }}
-      className={props.twClass}
+      className={`${defaultClasses} ${props.twClass}`}
       {...props}
     >
       {children}
