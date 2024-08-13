@@ -7,6 +7,7 @@ module.exports = {
       colors: {
         primary: "#4894FE",
         text: "#0D1B34",
+        text10: "rgba(13, 27, 52, 0.12)",
         tgray: "#8696BB",
         gray: "#FAFAFA",
         softPrimary: "rgb(99,180,255)",

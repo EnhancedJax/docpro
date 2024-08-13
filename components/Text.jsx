@@ -1,8 +1,12 @@
 import { Text as RNText } from "react-native";
 
-const defaultClasses = "text-text";
-
-export default function Text({ light, medium, bold, children, ...props }) {
+export default function Text({
+  twClass,
+  light = false,
+  medium = false,
+  bold = false,
+  children,
+}) {
   return (
     <RNText
       style={{
@@ -14,8 +18,8 @@ export default function Text({ light, medium, bold, children, ...props }) {
           ? "Ubuntu_700Bold"
           : "Ubuntu_400Regular",
       }}
-      className={`${defaultClasses} ${props.twClass}`}
-      {...props}
+      className={`text-text ${twClass}`}
+      // {...props}
     >
       {children}
     </RNText>

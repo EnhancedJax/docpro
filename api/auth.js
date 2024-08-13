@@ -7,7 +7,11 @@ export const callLoginUser = async (data) => {
     token: "ABC",
   };
 
-  throw new Error("Login failed");
+  if (response.token) {
+    return response;
+  } else {
+    throw new Error("Login failed");
+  }
 };
 
 export const callSignupUser = async (data) => {

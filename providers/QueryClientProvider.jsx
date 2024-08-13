@@ -3,10 +3,13 @@ import {
   QueryClientProvider as QCP,
   QueryClient,
 } from "@tanstack/react-query";
+import { useLoader } from "../components/loader";
 import { useToast } from "../components/toast";
 
 export default function QueryClientProvider({ children }) {
   const { showToast } = useToast();
+  const { showLoader, hideLoader } = useLoader();
+
   const queryClient = new QueryClient({
     mutationCache: new MutationCache({
       onError: (error) => {
@@ -14,6 +17,12 @@ export default function QueryClientProvider({ children }) {
           type: "error",
           message: "Something went wrong",
         });
+      },
+      onMutate: (mutation) => {
+        showLoader();
+      },
+      onSettled: (mutation) => {
+        hideLoader();
       },
     }),
   });

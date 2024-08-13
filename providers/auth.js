@@ -4,6 +4,7 @@ import { router } from "expo-router";
 import React, { createContext, useContext } from "react";
 import { callLoginUser, callSignupUser } from "../api/auth";
 import { useToast } from "../components/toast";
+import { ROUTE_ENTRY, ROUTE_HOME, ROUTE_SIGNUP } from "../constants/routes";
 
 const AuthContext = createContext();
 
@@ -21,7 +22,7 @@ export const AuthProvider = ({ children }) => {
         type: "success",
         message: "Successfully logged in",
       });
-      router.replace("/(app)/home");
+      router.replace(ROUTE_HOME);
     },
   });
 
@@ -35,7 +36,7 @@ export const AuthProvider = ({ children }) => {
         type: "success",
         message: "Successfully signed up",
       });
-      router.replace("/(app)/home");
+      router.replace(ROUTE_SIGNUP);
     },
   });
 
@@ -51,7 +52,7 @@ export const AuthProvider = ({ children }) => {
     try {
       queryClient.setQueryData(["token"], null);
       await AsyncStorage.removeItem("token");
-      router.replace("/");
+      router.replace(ROUTE_ENTRY);
     } catch (error) {
       console.error("Error removing token:", error);
     }

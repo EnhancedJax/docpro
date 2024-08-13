@@ -11,6 +11,13 @@ import {
 } from "@expo-google-fonts/ubuntu";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import {
+  Keyboard,
+  KeyboardAvoidingView,
+  SafeAreaView,
+  TouchableWithoutFeedback,
+} from "react-native";
+import { LoaderProvider } from "../components/loader";
 import { ToastProvider } from "../components/toast";
 import { AuthProvider } from "../providers/auth";
 import QueryClientProvider from "../providers/QueryClientProvider";
@@ -38,14 +45,22 @@ export default function RootLayout() {
 
   return (
     <ToastProvider>
-      <QueryClientProvider>
-        <AuthProvider>
-          <Stack screenOptions={{ headerShown: false }}>
-            <Stack.Screen name="index" />
-            <Stack.Screen name="login" />
-          </Stack>
-        </AuthProvider>
-      </QueryClientProvider>
+      <LoaderProvider>
+        <QueryClientProvider>
+          <AuthProvider>
+            <SafeAreaView className="h-full bg-white">
+              <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+                  <Stack screenOptions={{ headerShown: false }}>
+                    <Stack.Screen name="index" />
+                    <Stack.Screen name="login" />
+                  </Stack>
+                </KeyboardAvoidingView>
+              </TouchableWithoutFeedback>
+            </SafeAreaView>
+          </AuthProvider>
+        </QueryClientProvider>
+      </LoaderProvider>
     </ToastProvider>
   );
 }
