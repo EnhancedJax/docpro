@@ -1,64 +1,111 @@
 import { BlurView } from "expo-blur";
+import * as Haptics from "expo-haptics";
+import { Plus } from "lucide-react-native";
 import React, { useState } from "react";
 import { Pressable, TouchableOpacity, View } from "react-native";
 import Animated, {
+  Easing,
+  FadeInUp,
+  FadeOutDown,
   useAnimatedStyle,
   useSharedValue,
-  withSpring,
+  withTiming,
 } from "react-native-reanimated";
 import Text from "./Text";
 
-const FAB = ({ items }) => {
+const FAB = ({ items = [] }) => {
   const [isOpen, setIsOpen] = useState(false);
   const rotation = useSharedValue(0);
+  const backgroundOpacity = useSharedValue(0);
+  const scale = useSharedValue(1);
 
   const animatedStyles = useAnimatedStyle(() => {
     return {
-      transform: [{ rotate: `${rotation.value}deg` }],
+      transform: [{ rotate: `${rotation.value}deg` }, { scale: scale.value }],
+    };
+  });
+
+  const backgroundAnimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: backgroundOpacity.value,
     };
   });
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
-    rotation.value = withSpring(isOpen ? 0 : 45);
+    rotation.value = withTiming(isOpen ? 0 : 45, {
+      duration: 100,
+      easing: Easing.ease,
+    });
+    backgroundOpacity.value = withTiming(isOpen ? 0 : 1, { duration: 300 });
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
+  };
+
+  const handlePressIn = () => {
+    scale.value = withTiming(0.8, { duration: 100, easing: Easing.ease });
+  };
+
+  const handlePressOut = () => {
+    scale.value = withTiming(1, { duration: 100, easing: Easing.ease });
   };
 
   return (
-    <>
-      {isOpen && (
-        <BlurView
-          intensity={20}
-          style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }}
-        />
-      )}
-      <View className="absolute bottom-6 right-6">
-        {isOpen && (
-          <View className="mb-4">
-            {items.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                onPress={item.onPress}
-                className="bg-softPrimary rounded-full w-12 h-12 mb-2 items-center justify-center"
-              >
-                <Text light className="text-white">
-                  {item.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-        <Pressable onPress={toggleMenu}>
-          <Animated.View
-            style={animatedStyles}
-            className="bg-primary w-16 h-16 rounded-full items-center justify-center shadow-lg"
-          >
-            <Text bold className="text-white text-3xl">
-              +
-            </Text>
-          </Animated.View>
+    <View
+      className="absolute flex items-end justify-end w-full h-full px-6 py-12"
+      pointerEvents="box-none"
+    >
+      <Animated.View
+        style={[
+          {
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+          },
+          backgroundAnimatedStyle,
+        ]}
+        pointerEvents={isOpen ? "auto" : "none"}
+      >
+        <Pressable className="flex-1" onPress={toggleMenu}>
+          <BlurView intensity={40} className="flex-1" />
         </Pressable>
-      </View>
-    </>
+      </Animated.View>
+      {isOpen && (
+        <View className="z-10 mb-4">
+          {items.map((item, index) => (
+            <Animated.View
+              key={index}
+              entering={FadeInUp.delay((items.length - index) * 100)
+                .duration(300)
+                .easing(Easing.out(Easing.ease))}
+              exiting={FadeOutDown.delay((items.length - index) * 100)
+                .duration(300)
+                .easing(Easing.in(Easing.ease))}
+            >
+              <TouchableOpacity
+                onPress={item.onPress}
+                className="items-center justify-center flex-initial px-4 py-4 mb-2 rounded-full bg-softPrimary"
+              >
+                <Text twClass="text-white">{item.label}</Text>
+              </TouchableOpacity>
+            </Animated.View>
+          ))}
+        </View>
+      )}
+      <Pressable
+        onPress={toggleMenu}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+      >
+        <Animated.View
+          style={animatedStyles}
+          className="items-center justify-center w-20 h-20 rounded-full shadow-lg bg-primary"
+        >
+          <Plus size={30} color="white" />
+        </Animated.View>
+      </Pressable>
+    </View>
   );
 };
 
