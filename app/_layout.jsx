@@ -36,7 +36,6 @@ export default function RootLayout() {
     Ubuntu_700Bold,
     Ubuntu_700Bold_Italic,
   });
-
   if (!loaded) {
     return null;
   }

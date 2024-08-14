@@ -1,3 +1,4 @@
+import { StripeProvider } from "@stripe/stripe-react-native";
 import { UserRoundPen } from "lucide-react-native";
 import { useState } from "react";
 import { View } from "react-native";
@@ -65,7 +66,11 @@ export default function Home() {
   });
 
   return (
-    <>
+    <StripeProvider
+      publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+      merchantIdentifier="docpro"
+      urlScheme="docpro"
+    >
       <View className="flex-1 py-12 bg-white ">
         <View className="flex flex-row px-6 mb-8">
           <View className="flex-1">
@@ -118,6 +123,6 @@ export default function Home() {
           onPress: () => {},
         }))}
       />
-    </>
+    </StripeProvider>
   );
 }

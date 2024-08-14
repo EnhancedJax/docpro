@@ -1,16 +1,42 @@
+import { useStripe } from "@stripe/stripe-react-native";
 import { Clock, HandCoins, StepForward } from "lucide-react-native";
 import { View } from "react-native";
+import { useLoader } from "../components/loader";
 import Pressable from "../components/Pressable";
 import Text from "../components/Text";
+import { useToast } from "../components/toast";
 import { DOCUMENT_TYPES } from "../constants";
 import Colors from "../constants/color";
 
 export default function SwipeListItem({ item }) {
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const { showLoader, hideLoader } = useLoader();
+  const { showToast } = useToast();
   return (
     <Pressable
       className="py-5 mb-4 bg-white rounded-lg shadow-md"
-      onPress={() => {
-        console.log(item);
+      onPress={async () => {
+        switch (item.status) {
+          case 0:
+            break;
+          case 2:
+            break;
+          case 1:
+            try {
+              showLoader();
+              initPaymentSheet({
+                paymentIntentClientSecret: "pi_1234567890",
+                returnURL: "stripe-redirect",
+              });
+              await new Promise((resolve) => setTimeout(resolve, 1000));
+              hideLoader();
+              await presentPaymentSheet();
+            } catch (error) {
+              showToast(error.message);
+            } finally {
+            }
+            break;
+        }
       }}
     >
       <View className="flex flex-row items-center">
