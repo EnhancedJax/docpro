@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { TouchableOpacity, View } from "react-native";
 import Button from "../components/Button";
@@ -7,7 +7,14 @@ import Text from "../components/Text";
 import { useAuthContext } from "../providers/auth";
 
 export default function Index() {
-  const { control, handleSubmit } = useForm();
+  const [currentScreen, setCurrentScreen] = useState(null);
+  const { control, handleSubmit } = useForm({
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+  });
   const { login, signup } = useAuthContext();
 
   const onSignupPress = (data) => {
@@ -28,32 +35,83 @@ export default function Index() {
           DocPro
         </Text>
       </View>
-      <View className="mb-12">
-        <Input
-          control={control}
-          name="email"
-          placeholder="Email"
-          className="mb-4"
-        />
-        <Input
-          type="password"
-          placeholder="Password"
-          control={control}
-          name="password"
-        />
-      </View>
-      <View>
-        <Button className="mb-2" onPress={handleSubmit(onSignupPress)}>
-          Sign up
-        </Button>
-        <View className="flex flex-row justify-center">
-          <Text>Already have an account?</Text>
-          <TouchableOpacity onPress={handleSubmit(onLoginPress)}>
-            <Text twClass="ml-2 text-softPrimary" medium>
-              Login
-            </Text>
-          </TouchableOpacity>
+      {currentScreen !== null && (
+        <View className="mb-12">
+          <Input
+            control={control}
+            name="email"
+            placeholder="Email"
+            className="mb-4"
+            textContentType="oneTimeCode"
+          />
+          <Input
+            type="password"
+            placeholder="Password"
+            control={control}
+            name="password"
+            className="mb-4"
+          />
+          {currentScreen === "signup" && (
+            <Input
+              type="password"
+              placeholder="Confirm Password"
+              control={control}
+              name="confirmPassword"
+            />
+          )}
         </View>
+      )}
+      <View>
+        {(currentScreen === "signup" || currentScreen === null) && (
+          <Button
+            className="mb-2"
+            onPress={() => {
+              if (currentScreen === "signup") {
+                handleSubmit(onSignupPress)();
+              } else {
+                setCurrentScreen("signup");
+              }
+            }}
+          >
+            Sign up
+          </Button>
+        )}
+        {(currentScreen === "login" || currentScreen === null) && (
+          <Button
+            className="mb-2"
+            onPress={() => {
+              if (currentScreen === "login") {
+                handleSubmit(onLoginPress)();
+              } else {
+                setCurrentScreen("login");
+              }
+            }}
+          >
+            Login
+          </Button>
+        )}
+        {currentScreen !== null && (
+          <View className="flex flex-row justify-center">
+            <Text>
+              {currentScreen === "signup"
+                ? "Already have an account?"
+                : "Don't have an account?"}
+            </Text>
+            <TouchableOpacity
+              onPress={() => {
+                if (currentScreen === "signup") {
+                  setCurrentScreen("login");
+                } else {
+                  setCurrentScreen("signup");
+                }
+              }}
+            >
+              <Text twClass="ml-2 text-softPrimary" medium>
+                {currentScreen === "signup" ? "Login" : "Sign up"}
+              </Text>
+            </TouchableOpacity>
+          </View>
+        )}
       </View>
     </View>
   );

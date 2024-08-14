@@ -2,7 +2,7 @@ import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { Plus } from "lucide-react-native";
 import React, { useState } from "react";
-import { Pressable, TouchableOpacity, View } from "react-native";
+import { Pressable as RNPressable, TouchableOpacity, View } from "react-native";
 import Animated, {
   Easing,
   FadeInUp,
@@ -33,9 +33,9 @@ const FAB = ({ items = [] }) => {
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
-    rotation.value = withTiming(isOpen ? 0 : 45, {
-      duration: 100,
-      easing: Easing.ease,
+    rotation.value = withTiming(isOpen ? 0 : 315, {
+      duration: 600,
+      easing: Easing.inOut(Easing.ease),
     });
     backgroundOpacity.value = withTiming(isOpen ? 0 : 1, { duration: 300 });
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Soft);
@@ -67,9 +67,9 @@ const FAB = ({ items = [] }) => {
         ]}
         pointerEvents={isOpen ? "auto" : "none"}
       >
-        <Pressable className="flex-1" onPress={toggleMenu}>
+        <RNPressable className="flex-1" onPress={toggleMenu}>
           <BlurView intensity={40} className="flex-1" />
-        </Pressable>
+        </RNPressable>
       </Animated.View>
       {isOpen && (
         <View className="z-10 mb-4">
@@ -84,7 +84,7 @@ const FAB = ({ items = [] }) => {
                 .easing(Easing.in(Easing.ease))}
             >
               <TouchableOpacity
-                onPress={item.onPress}
+                onPress={() => item.onPress(index)}
                 className="items-center justify-center flex-initial px-4 py-4 mb-2 rounded-full bg-softPrimary"
               >
                 <Text twClass="text-white">{item.label}</Text>
@@ -93,7 +93,7 @@ const FAB = ({ items = [] }) => {
           ))}
         </View>
       )}
-      <Pressable
+      <RNPressable
         onPress={toggleMenu}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
@@ -104,7 +104,7 @@ const FAB = ({ items = [] }) => {
         >
           <Plus size={30} color="white" />
         </Animated.View>
-      </Pressable>
+      </RNPressable>
     </View>
   );
 };

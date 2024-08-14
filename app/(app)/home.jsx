@@ -1,16 +1,18 @@
 import { StripeProvider } from "@stripe/stripe-react-native";
+import { router } from "expo-router";
 import { UserRoundPen } from "lucide-react-native";
 import { useState } from "react";
 import { View } from "react-native";
 import { SwipeListView } from "react-native-swipe-list-view";
-import FAB from "../../../components/Fab";
-import GradientMask from "../../../components/GradientMask";
-import Pressable from "../../../components/Pressable";
-import Text from "../../../components/Text";
-import { DOCUMENT_TYPES } from "../../../constants";
-import FilterView from "../../../containers/home_FilterView";
-import SwipeListItem from "../../../containers/home_SwipeListItem";
-import { useAuthContext } from "../../../providers/auth";
+import FAB from "../../components/Fab";
+import GradientMask from "../../components/GradientMask";
+import Pressable from "../../components/Pressable";
+import Text from "../../components/Text";
+import { DOCUMENT_TYPES } from "../../constants";
+import { ROUTE_NEW_DOCUMENT } from "../../constants/routes";
+import FilterView from "../../containers/home_FilterView";
+import SwipeListItem from "../../containers/home_SwipeListItem";
+import { useAuthContext } from "../../providers/auth";
 
 const DUMMY_DATA = [
   {
@@ -120,7 +122,9 @@ export default function Home() {
       <FAB
         items={DOCUMENT_TYPES.map((type) => ({
           label: type,
-          onPress: () => {},
+          onPress: (index) => {
+            router.push(`${ROUTE_NEW_DOCUMENT}template${index}`);
+          },
         }))}
       />
     </StripeProvider>

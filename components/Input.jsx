@@ -25,7 +25,7 @@ export default function Input({
               onChangeText={onChange}
               onBlur={onBlur}
             />
-            <View className="absolute flex items-center justify-center h-full right-3">
+            <View className="absolute flex items-center justify-center h-10 right-3">
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                 {showPassword ? (
                   <EyeOff size={20} color="#8696BB" />

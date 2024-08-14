@@ -32,6 +32,9 @@ export default function FilterView({ filter, setFilter }) {
       <ScrollView
         horizontal
         className="flex flex-row"
+        style={{
+          overflow: "visible",
+        }}
         showsHorizontalScrollIndicator={false}
       >
         {DOCUMENT_TYPES.map((type, index) => (
