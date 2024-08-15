@@ -5,6 +5,7 @@ export const callLoginUser = async (data) => {
   // Dummy response
   const response = {
     token: "ABC",
+    refreshToken: "DEF",
   };
 
   if (response.token) {
@@ -28,4 +29,14 @@ export const callSignupUser = async (data) => {
   } else {
     throw new Error("Signup failed");
   }
+};
+
+export const callRefreshToken = async (data) => {
+  // Simulating API call with a timeout
+  await new Promise((resolve) => setTimeout(resolve, 100));
+
+  // Dummy response
+  const response = {
+    token: "ABC",
+  };
 };

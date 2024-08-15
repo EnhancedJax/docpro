@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { StackActions } from "@react-navigation/native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router, useNavigationContainerRef } from "expo-router";
-import React, { createContext, useContext } from "react";
+import React, { createContext, useCallback, useContext } from "react";
 import { callLoginUser, callSignupUser } from "../api/auth";
 import { useToast } from "../components/toast";
 import { ROUTE_ENTRY, ROUTE_HOME } from "../constants/routes";
@@ -15,33 +15,29 @@ export const AuthProvider = ({ children }) => {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
+  const getNewSession = useCallback(async (data) => {
+    console.log(data);
+    queryClient.setQueryData(["token"], data.token);
+    AsyncStorage.setItem("token", data.token);
+    AsyncStorage.setItem("refreshToken", data.refreshToken);
+    showToast({
+      type: "success",
+      message: "Successfully signed up",
+    });
+    if (rootNavigation.canGoBack()) {
+      rootNavigation.dispatch(StackActions.popToTop()); // pop to top of the stack if possible
+    }
+    router.replace(ROUTE_HOME);
+  }, []);
+
   const loginMutation = useMutation({
     mutationFn: callLoginUser,
-    onSuccess: (data) => {
-      console.log(data);
-      queryClient.setQueryData(["token"], data.token);
-      AsyncStorage.setItem("token", data.token);
-      showToast({
-        type: "success",
-        message: "Successfully logged in",
-      });
-      router.replace(ROUTE_HOME);
-    },
+    onSuccess: getNewSession,
   });
 
   const signupMutation = useMutation({
     mutationFn: callSignupUser,
-    onSuccess: (data) => {
-      console.log(data);
-      queryClient.setQueryData(["token"], data.token);
-      AsyncStorage.setItem("token", data.token);
-      showToast({
-        type: "success",
-        message: "Successfully signed up",
-      });
-      rootNavigation.dispatch(StackActions.popToTop()); // pop to top of the stack
-      router.replace(ROUTE_HOME);
-    },
+    onSuccess: getNewSession,
   });
 
   const login = async (data) => {
@@ -56,6 +52,7 @@ export const AuthProvider = ({ children }) => {
     try {
       queryClient.setQueryData(["token"], null);
       await AsyncStorage.removeItem("token");
+      await AsyncStorage.removeItem("refreshToken");
       router.replace(ROUTE_ENTRY);
     } catch (error) {
       console.error("Error removing token:", error);

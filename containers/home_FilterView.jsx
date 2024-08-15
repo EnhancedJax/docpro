@@ -6,7 +6,7 @@ import { DOCUMENT_TYPES } from "../constants";
 
 export default function FilterView({ filter, setFilter }) {
   return (
-    <View className="px-8">
+    <View className="px-6">
       <View className="flex flex-row mb-3">
         <TextInput
           placeholder="Search"

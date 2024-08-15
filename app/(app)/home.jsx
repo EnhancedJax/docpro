@@ -65,6 +65,7 @@ export default function Home() {
     sort: 1,
     type: null,
   });
+  const [tab, setTab] = useState(0);
 
   return (
     <StripeProvider
@@ -72,7 +73,7 @@ export default function Home() {
       merchantIdentifier="docpro"
       urlScheme="docpro"
     >
-      <View className="flex-1 py-12 bg-white ">
+      <View className="flex-col flex-1 pt-12 bg-white">
         <View className="flex flex-row px-6 mb-8">
           <View className="flex-1">
             <Text twClass="text-tgray text-base">Hello,</Text>
@@ -88,35 +89,62 @@ export default function Home() {
           </Pressable>
         </View>
         <FilterView filter={filter} setFilter={setFilter} />
-        <GradientMask intensity={5}>
-          <SwipeListView
-            showsVerticalScrollIndicator={false}
-            className="flex-1 px-6 pt-6"
-            data={DUMMY_DATA.filter((item) => {
-              return (
-                (!filter.searchQuery ||
-                  item.title
-                    .toLowerCase()
-                    .includes(filter.searchQuery.toLowerCase())) &&
-                (filter.type === null || item.type === filter.type)
-              );
-            })}
-            renderItem={({ item }) => <SwipeListItem item={item} />}
-            renderHiddenItem={({ item }) => (
-              <Pressable
-                className="items-end justify-center flex-1 pr-4 mb-4 ml-10 bg-red-500 rounded-xl"
-                onPress={() => {
-                  console.log("Deleting item", item.id);
-                }}
+        <View className="flex-col flex-1">
+          <View className="flex flex-row justify-between px-6 mt-4">
+            <Pressable className="" onPress={() => setTab(0)}>
+              <Text
+                twClass={`text-base ${tab === 0 ? "text-text" : "text-tgray"}`}
               >
-                <Text twClass="text-white">Delete</Text>
-              </Pressable>
-            )}
-            rightOpenValue={-75}
-            disableRightSwipe
-            keyExtractor={(item) => item.id}
-          />
-        </GradientMask>
+                My documents
+              </Text>
+            </Pressable>
+            <Pressable className="" onPress={() => setTab(1)}>
+              <Text
+                twClass={`text-base ${tab === 1 ? "text-text" : "text-tgray"}`}
+              >
+                Drafts
+              </Text>
+            </Pressable>
+          </View>
+          <View className="flex-1 ">
+            <GradientMask intensity={5}>
+              <SwipeListView
+                showsVerticalScrollIndicator={false}
+                className="flex-1 px-6 pt-6 "
+                data={DUMMY_DATA.filter((item) => {
+                  return (
+                    (!filter.searchQuery ||
+                      item.title
+                        .toLowerCase()
+                        .includes(filter.searchQuery.toLowerCase())) &&
+                    (filter.type === null || item.type === filter.type) &&
+                    (tab === 0 ? item.status !== 0 : item.status === 0)
+                  );
+                }).sort((a, b) => {
+                  const statusComparison = a.status - b.status;
+                  const dateComparison = filter.sort * (b.date - a.date);
+                  return statusComparison !== 0
+                    ? statusComparison
+                    : dateComparison;
+                })}
+                renderItem={({ item }) => <SwipeListItem item={item} />}
+                renderHiddenItem={({ item }) => (
+                  <Pressable
+                    className="items-end justify-center flex-1 pr-4 mb-4 ml-10 bg-red-500 rounded-xl"
+                    onPress={() => {
+                      console.log("Deleting item", item.id);
+                    }}
+                  >
+                    <Text twClass="text-white">Delete</Text>
+                  </Pressable>
+                )}
+                rightOpenValue={-75}
+                disableRightSwipe
+                keyExtractor={(item) => item.id}
+              />
+            </GradientMask>
+          </View>
+        </View>
       </View>
       <FAB
         items={DOCUMENT_TYPES.map((type) => ({
