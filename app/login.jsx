@@ -80,7 +80,7 @@ export default function Index() {
                 setCurrentScreen("signup");
               }
             }}
-            cooldown={1000}
+            cooldown={200}
           >
             Sign up
           </Button>

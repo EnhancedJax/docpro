@@ -1,17 +1,18 @@
 import { StripeProvider } from "@stripe/stripe-react-native";
-import { router } from "expo-router";
-import { UserRoundPen } from "lucide-react-native";
-import { useState } from "react";
-import { View } from "react-native";
+import { router, useLocalSearchParams } from "expo-router";
+import { Squirrel, UserRoundPen } from "lucide-react-native";
+import { useEffect, useState } from "react";
+import { Alert, View } from "react-native";
 import { SwipeListView } from "react-native-swipe-list-view";
 import FAB from "../../components/Fab";
 import GradientMask from "../../components/GradientMask";
 import Pressable from "../../components/Pressable";
 import Text from "../../components/Text";
 import { DOCUMENT_TYPES } from "../../constants";
+import Colors from "../../constants/color";
+import { ROUTE_EDIT_USER } from "../../constants/routes";
 import FilterView from "../../containers/home_FilterView";
 import SwipeListItem from "../../containers/home_SwipeListItem";
-import { useAuthContext } from "../../providers/auth";
 
 const DUMMY_DATA = [
   {
@@ -59,13 +60,19 @@ const DUMMY_DATA = [
 ];
 
 export default function Home() {
-  const { logout } = useAuthContext();
   const [filter, setFilter] = useState({
     searchQuery: null,
     sort: 1,
     type: null,
   });
   const [tab, setTab] = useState(0);
+  const { finished, finishedId } = useLocalSearchParams();
+
+  useEffect(() => {
+    if (finished && finishedId) {
+      console.log("Finished", finished, finishedId);
+    }
+  }, []);
 
   return (
     <StripeProvider
@@ -83,7 +90,7 @@ export default function Home() {
           </View>
           <Pressable
             className="p-4 rounded-full bg-softPrimary10"
-            onPress={logout}
+            onPress={() => router.push(ROUTE_EDIT_USER)}
           >
             <UserRoundPen size={24} color="#63B4FF" />
           </Pressable>
@@ -110,7 +117,7 @@ export default function Home() {
             <GradientMask intensity={5}>
               <SwipeListView
                 showsVerticalScrollIndicator={false}
-                className="flex-1 px-6 pt-6 "
+                className="flex-1 px-6 pt-6"
                 data={DUMMY_DATA.filter((item) => {
                   return (
                     (!filter.searchQuery ||
@@ -127,12 +134,31 @@ export default function Home() {
                     ? statusComparison
                     : dateComparison;
                 })}
+                ListEmptyComponent={
+                  <View className="flex-col items-center justify-center flex-1 pt-10">
+                    <Squirrel size={48} color={Colors.tgray} />
+                    <Text twClass="text-tgray text-base mt-2">
+                      No documents
+                    </Text>
+                  </View>
+                }
                 renderItem={({ item }) => <SwipeListItem item={item} />}
                 renderHiddenItem={({ item }) => (
                   <Pressable
                     className="items-end justify-center flex-1 pr-4 mb-4 ml-10 bg-red-500 rounded-xl"
                     onPress={() => {
                       console.log("Deleting item", item.id);
+                      Alert.alert(
+                        "Delete",
+                        "Are you sure you want to delete this item? You won't be able to recover it or request a refund.",
+                        [
+                          { text: "Cancel", style: "cancel" },
+                          {
+                            text: "Delete",
+                            onPress: () => console.log("Deleted"),
+                          },
+                        ]
+                      );
                     }}
                   >
                     <Text twClass="text-white">Delete</Text>

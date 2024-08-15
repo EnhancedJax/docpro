@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useNavigation } from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { View } from "react-native";
 import Button from "../../components/Button";
@@ -6,6 +6,8 @@ import CardCarousel from "../../components/CardCarousel";
 import PageDots from "../../components/PageDots";
 import Text from "../../components/Text";
 import { useToast } from "../../components/toast";
+import { ROUTE_HOME } from "../../constants/routes";
+import popNavigation from "../../utils/popNavigation";
 
 const Questions = [
   {
@@ -32,6 +34,7 @@ export default function Document() {
   const { showToast } = useToast();
   const [activeIndex, setActiveIndex] = useState(0);
   const [progress, setProgress] = useState(0);
+  const [prematureHandledRemove, setPrematureHandledRemove] = useState(false);
 
   const handleBack = () => {
     navigation.goBack();
@@ -46,7 +49,9 @@ export default function Document() {
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (e) => {
-      handleOnRemove();
+      if (!prematureHandledRemove) {
+        handleOnRemove();
+      }
     });
 
     return unsubscribe;
@@ -63,10 +68,30 @@ export default function Document() {
           Save as Draft
         </Button>
         <Button
-          type={activeIndex === Questions.length - 1 ? "primary" : "inactive"}
-          onPress={() => {
-            console.log("finish");
-          }}
+          type={progress === Questions.length ? "primary" : "inactive"}
+          onPress={
+            progress === Questions.length
+              ? () => {
+                  console.log("finish");
+                  handleOnRemove();
+                  setPrematureHandledRemove(true);
+                  popNavigation();
+                  router.replace({
+                    pathname: ROUTE_HOME,
+                    params: {
+                      finished: true,
+                      finishedId: id,
+                    },
+                  });
+                }
+              : () => {
+                  showToast({
+                    message: "You must answer all questions.",
+                    type: "info",
+                  });
+                }
+          }
+          allowAction
           className="flex-1 ml-2"
         >
           Finish

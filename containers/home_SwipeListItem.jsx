@@ -1,4 +1,5 @@
 import { useStripe } from "@stripe/stripe-react-native";
+import { router } from "expo-router";
 import { Clock, HandCoins, StepForward } from "lucide-react-native";
 import { View } from "react-native";
 import { useLoader } from "../components/loader";
@@ -18,6 +19,7 @@ export default function SwipeListItem({ item }) {
       onPress={async () => {
         switch (item.status) {
           case 0:
+            router.push(`./${item.id}`);
             break;
           case 2:
             break;
