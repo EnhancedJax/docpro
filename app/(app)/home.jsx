@@ -9,7 +9,6 @@ import GradientMask from "../../components/GradientMask";
 import Pressable from "../../components/Pressable";
 import Text from "../../components/Text";
 import { DOCUMENT_TYPES } from "../../constants";
-import { ROUTE_NEW_DOCUMENT } from "../../constants/routes";
 import FilterView from "../../containers/home_FilterView";
 import SwipeListItem from "../../containers/home_SwipeListItem";
 import { useAuthContext } from "../../providers/auth";
@@ -123,7 +122,8 @@ export default function Home() {
         items={DOCUMENT_TYPES.map((type) => ({
           label: type,
           onPress: (index) => {
-            router.push(`${ROUTE_NEW_DOCUMENT}template${index}`);
+            const id = index;
+            router.push(`./${id}`);
           },
         }))}
       />

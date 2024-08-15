@@ -9,33 +9,20 @@ import {
 import Animated, {
   Extrapolation,
   interpolate,
+  runOnJS,
   useAnimatedScrollHandler,
   useAnimatedStyle,
   useSharedValue,
 } from "react-native-reanimated";
-import Pressable from "../../../components/Pressable";
-import Text from "../../../components/Text";
 
 const { width: VW, height: VH } = Dimensions.get("window");
 const CARD_WIDTH = VW * 0.8;
 const CARD_HEIGHT = VH * 0.7;
 const MARGIN_FOR_CARD = 5;
-const SPACING_FOR_CARD_INSET = (VW - CARD_WIDTH) / 2; // this value is for
+const SPACING_FOR_CARD_INSET = (VW - CARD_WIDTH) / 2;
 const ANIMATE_SCALE_CARD = 0.85;
 
-const cards = [
-  { name: "Card 1" },
-  { name: "Card 2" },
-  { name: "Card 3" },
-  { name: "Card 3" },
-  { name: "Card 3" },
-  { name: "Card 3" },
-  { name: "Card 3" },
-  { name: "Card 3" },
-  { name: "Card 3" },
-];
-
-const AnimatedCard = ({ index, card, scrollX }) => {
+const AnimatedCard = ({ index, scrollX, children }) => {
   const { cardSizeStyle } = styles;
 
   const inputRange = [
@@ -73,24 +60,30 @@ const AnimatedCard = ({ index, card, scrollX }) => {
     <RNPressable style={cardSizeStyle}>
       <Animated.View
         style={[animatedStyle]}
-        className="items-center justify-center flex-1 bg-white shadow-xl rounded-3xl"
+        className="items-center justify-center flex-1 bg-white shadow-md rounded-3xl"
       >
-        <Pressable
-          style={{ flex: 1, justifyContent: "center", alignItems: "center" }}
-        >
-          <Text>{card.name}</Text>
-        </Pressable>
+        <View className="flex-1 w-full">{children}</View>
       </Animated.View>
     </RNPressable>
   );
 };
 
-export default function Document() {
+export default function CardCarousel({
+  activeIndex,
+  setActiveIndex = () => {},
+  children = null,
+}) {
   const scrollX = useSharedValue(0);
 
   const scrollHandler = useAnimatedScrollHandler({
     onScroll: (event) => {
       scrollX.value = event.contentOffset.x;
+      const newActiveIndex = parseInt(
+        (event.contentOffset.x + SPACING_FOR_CARD_INSET) / CARD_WIDTH
+      );
+      if (newActiveIndex !== activeIndex) {
+        runOnJS(setActiveIndex)(newActiveIndex);
+      }
     },
   });
 
@@ -117,13 +110,10 @@ export default function Document() {
         onScroll={scrollHandler}
         scrollEventThrottle={16}
       >
-        {cards.map((card, index) => (
-          <AnimatedCard
-            key={index}
-            index={index}
-            card={card}
-            scrollX={scrollX}
-          />
+        {React.Children.map(children, (child, index) => (
+          <AnimatedCard key={index} index={index} scrollX={scrollX}>
+            {child}
+          </AnimatedCard>
         ))}
       </Animated.ScrollView>
     </View>
@@ -134,6 +124,7 @@ const styles = StyleSheet.create({
   cardSizeStyle: {
     width: CARD_WIDTH,
     height: CARD_HEIGHT,
-    margin: MARGIN_FOR_CARD,
+    marginHorizontal: MARGIN_FOR_CARD,
+    marginBottom: 10,
   },
 });

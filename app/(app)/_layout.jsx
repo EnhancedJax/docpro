@@ -5,7 +5,7 @@ export default function RootLayout() {
     <Stack screenOptions={{ headerShown: false }}>
       <Stack.Screen name="home" />
       <Stack.Screen name="editUser" />
-      <Stack.Screen name="newDoc" />
+      <Stack.Screen name="[id]" />
     </Stack>
   );
 }

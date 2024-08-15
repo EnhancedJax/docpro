@@ -11,7 +11,7 @@ export default function Button({
     return (
       <Pressable
         onPress={onPress}
-        className="flex items-center px-12 py-3 rounded-full bg-tgray"
+        className="flex items-center py-3 rounded-full bg-tgray"
         {...props}
       >
         <Text twClass="text-white">{children}</Text>
@@ -20,7 +20,7 @@ export default function Button({
   } else if (type === "inactive") {
     return (
       <Pressable
-        className="flex items-center px-12 py-3 rounded-full bg-gray"
+        className="flex items-center py-3 rounded-full bg-gray"
         {...props}
       >
         <Text twClass="text-text10">{children}</Text>
@@ -30,7 +30,7 @@ export default function Button({
     return (
       <Pressable
         onPress={onPress}
-        className="flex items-center px-12 py-3 rounded-full bg-primary"
+        className="flex items-center py-3 rounded-full bg-primary"
         {...props}
       >
         <Text twClass="text-white">{children}</Text>
