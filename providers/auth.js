@@ -1,10 +1,13 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { StackActions } from "@react-navigation/native";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { router } from "expo-router";
+import { router, useNavigationContainerRef } from "expo-router";
 import React, { createContext, useContext } from "react";
 import { callLoginUser, callSignupUser } from "../api/auth";
 import { useToast } from "../components/toast";
-import { ROUTE_ENTRY, ROUTE_HOME, ROUTE_SIGNUP } from "../constants/routes";
+import { ROUTE_ENTRY, ROUTE_HOME } from "../constants/routes";
+
+const rootNavigation = useNavigationContainerRef();
 
 const AuthContext = createContext();
 
@@ -36,7 +39,8 @@ export const AuthProvider = ({ children }) => {
         type: "success",
         message: "Successfully signed up",
       });
-      router.replace(ROUTE_SIGNUP);
+      rootNavigation.dispatch(StackActions.popToTop()); // pop to top of the stack
+      router.replace(ROUTE_HOME);
     },
   });
 

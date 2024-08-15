@@ -1,9 +1,11 @@
+import { router } from "expo-router";
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { TouchableOpacity, View } from "react-native";
 import Button from "../components/Button";
 import Input from "../components/Input";
 import Text from "../components/Text";
+import { ROUTE_SIGNUP } from "../constants/routes";
 import { useAuthContext } from "../providers/auth";
 
 export default function Index() {
@@ -15,10 +17,16 @@ export default function Index() {
       confirmPassword: "",
     },
   });
-  const { login, signup } = useAuthContext();
+  const { login } = useAuthContext();
 
   const onSignupPress = (data) => {
-    signup(data);
+    router.push({
+      pathname: ROUTE_SIGNUP,
+      params: {
+        email: data.email,
+        password: data.password,
+      },
+    });
   };
 
   const onLoginPress = (data) => {
@@ -72,6 +80,7 @@ export default function Index() {
                 setCurrentScreen("signup");
               }
             }}
+            cooldown={1000}
           >
             Sign up
           </Button>

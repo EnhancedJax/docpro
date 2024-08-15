@@ -1,19 +1,29 @@
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { Platform, TextInput, TouchableOpacity, View } from "react-native";
+import {
+  Keyboard,
+  Platform,
+  TextInput,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import Button from "../components/Button";
+import CardCarousel from "../components/CardCarousel";
+import PageDots from "../components/PageDots";
 import Text from "../components/Text";
-import { ROUTE_HOME } from "../constants/routes";
 import { FORM } from "../constants/signup";
+import { useAuthContext } from "../providers/auth";
 
 export default function Index() {
-  const [currentStep, setCurrentStep] = useState(0);
+  const { signup } = useAuthContext();
+  const { email, password } = useLocalSearchParams();
+  const [progress, setProgress] = useState(0);
   const {
     control,
     handleSubmit,
-    formState: { errors },
+    formState: { isValid, errors },
     trigger,
     getValues,
   } = useForm({
@@ -25,23 +35,17 @@ export default function Index() {
   });
 
   const onSubmit = (data) => {
-    console.log(data);
-    router.replace(ROUTE_HOME);
-  };
-
-  const handleNext = async () => {
-    const isStepValid = await trigger(FORM[currentStep].name);
-    if (isStepValid) {
-      setCurrentStep((prev) => Math.min(prev + 1, FORM.length - 1));
-    }
+    const signupData = { ...data, email, password };
+    console.log(signupData);
+    Keyboard.dismiss();
+    signup(signupData);
   };
 
   const handlePrevious = () => {
-    setCurrentStep((prev) => Math.max(prev - 1, 0));
+    router.back();
   };
 
-  const renderField = () => {
-    const thisFormField = FORM[currentStep];
+  const renderField = (thisFormField) => {
     return (
       <Controller
         control={control}
@@ -103,34 +107,44 @@ export default function Index() {
   };
 
   return (
-    <View className="justify-between flex-1 p-4">
-      <Text twClass="text-center text-xl font-bold">
-        Setup ({currentStep + 1}/{FORM.length})
-      </Text>
-
-      <View className="items-center justify-center flex-1">
-        <Text twClass="text-lg mb-4">{FORM[currentStep].title}</Text>
-        {renderField()}
-        {errors[FORM[currentStep].name] && (
-          <Text twClass="text-red-500 mt-2">This field is required</Text>
-        )}
-      </View>
-
-      <View className="flex flex-row">
+    <View className="flex-col flex-1 border-t border-b border-neutral-300">
+      <View className="flex-row p-6">
         <Button
-          type={currentStep === 0 ? "inactive" : "secondary"}
+          type="secondary"
           onPress={handlePrevious}
-          disabled={currentStep === 0}
+          className="flex-1 mr-2"
         >
-          Previous
+          Go back
         </Button>
-        {currentStep === FORM.length - 1 ? (
-          <Button onPress={handleSubmit(onSubmit)}>Finish</Button>
-        ) : (
-          <Button type="secondary" onPress={handleNext}>
-            Next
-          </Button>
-        )}
+        <Button
+          type={isValid ? "primary" : "inactive"}
+          onPress={handleSubmit(onSubmit)}
+          allowAction
+          className="flex-1 ml-2"
+        >
+          Finish
+        </Button>
+      </View>
+      <CardCarousel activeIndex={progress} setActiveIndex={setProgress}>
+        {FORM.map((formField, index) => (
+          <View
+            key={`FormField${index}`}
+            className="items-center justify-center flex-1"
+          >
+            <Text twClass="text-lg mb-4">{formField.title}</Text>
+            {renderField(formField)}
+            {errors[formField.name] && (
+              <Text twClass="text-red-500 mt-2">This field is required</Text>
+            )}
+          </View>
+        ))}
+      </CardCarousel>
+      <View className="flex-row w-full h-10">
+        <PageDots
+          activeIndex={progress}
+          totalPages={FORM.length}
+          progress={progress}
+        />
       </View>
     </View>
   );
