@@ -1,8 +1,9 @@
 import DateTimePicker from "@react-native-community/datetimepicker";
 import React from "react";
 import { Controller } from "react-hook-form";
-import { ScrollView, TextInput, View } from "react-native";
+import { View } from "react-native";
 import Checkbox from "../components/Checkbox";
+import Input from "../components/Input";
 import { RadioButtonGroup } from "../components/RadioButton";
 import Text from "../components/Text";
 
@@ -12,22 +13,17 @@ export default function QuestionCard({ question, index, control, errors }) {
       case "text":
       case "number":
         return (
-          <Controller
-            control={control}
-            rules={{ required: true }}
-            render={({ field: { onChange, onBlur, value } }) => (
-              <TextInput
-                onBlur={onBlur}
-                onChangeText={onChange}
-                value={value}
-                keyboardType={
-                  question.type === "number" ? "numeric" : "default"
-                }
-                className="w-full p-2 border border-gray-300 rounded"
-              />
-            )}
-            name={index.toString()}
-          />
+          <>
+            <Input
+              control={control}
+              name={index.toString()}
+              rules={{ required: true }}
+              label={question.question}
+              placeholder={question.placeholder}
+              value={question.value}
+              keyboardType={question.type === "number" ? "numeric" : "default"}
+            />
+          </>
         );
       case "date":
         return (
@@ -38,7 +34,7 @@ export default function QuestionCard({ question, index, control, errors }) {
               <DateTimePicker
                 value={value || new Date()}
                 mode="date"
-                display="default"
+                display="spinner"
                 onChange={(event, selectedDate) => {
                   onChange(selectedDate);
                 }}
@@ -70,25 +66,20 @@ export default function QuestionCard({ question, index, control, errors }) {
             render={({ field: { onChange, value } }) => (
               <View>
                 {question.options.map((option) => (
-                  <View key={option} className="flex-row items-center">
-                    <Checkbox
-                      status={
-                        value && value.includes(option)
-                          ? "checked"
-                          : "unchecked"
+                  <Checkbox
+                    key={option}
+                    status={value && value.includes(option)}
+                    onPress={() => {
+                      const updatedValue = value ? [...value] : [];
+                      if (updatedValue.includes(option)) {
+                        updatedValue.splice(updatedValue.indexOf(option), 1);
+                      } else {
+                        updatedValue.push(option);
                       }
-                      onPress={() => {
-                        const updatedValue = value ? [...value] : [];
-                        if (updatedValue.includes(option)) {
-                          updatedValue.splice(updatedValue.indexOf(option), 1);
-                        } else {
-                          updatedValue.push(option);
-                        }
-                        onChange(updatedValue);
-                      }}
-                    />
-                    <Text>{option}</Text>
-                  </View>
+                      onChange(updatedValue);
+                    }}
+                    text={option}
+                  />
                 ))}
               </View>
             )}
@@ -101,16 +92,17 @@ export default function QuestionCard({ question, index, control, errors }) {
   };
 
   return (
-    <ScrollView
-      className="flex-col w-full h-full p-4"
-      showsVerticalScrollIndicator={false}
-    >
-      <Text className="mb-2 text-lg font-bold">{question.question}</Text>
-      <Text className="mb-4">{question.description}</Text>
+    <View className="flex-col w-full h-full p-4">
+      <Text bold twClass="mb-2 text-xl">
+        {question.question}
+      </Text>
+      {question?.description && (
+        <Text twClass="mb-8 text-base">{question.description}</Text>
+      )}
       {renderInput()}
       {errors[index.toString()] && (
-        <Text className="mt-2 text-red-500">This field is required.</Text>
+        <Text twClass="mt-2 text-red-500">This field is required.</Text>
       )}
-    </ScrollView>
+    </View>
   );
 }

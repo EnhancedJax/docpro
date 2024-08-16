@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef } from "react";
 import {
   Dimensions,
   Platform,
@@ -16,8 +16,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 const { width: VW, height: VH } = Dimensions.get("window");
-const CARD_WIDTH = VW * 0.8;
-const CARD_HEIGHT = VH * 0.7;
+const CARD_WIDTH = VW * 0.85;
 const MARGIN_FOR_CARD = 5;
 const SPACING_FOR_CARD_INSET = (VW - CARD_WIDTH) / 2;
 const ANIMATE_SCALE_CARD = 0.85;
@@ -72,7 +71,9 @@ export default function CardCarousel({
   activeIndex,
   setActiveIndex = () => {},
   children = null,
+  goToIndex = null,
 }) {
+  const ref = useRef(null);
   const scrollX = useSharedValue(0);
 
   const scrollHandler = useAnimatedScrollHandler({
@@ -87,9 +88,16 @@ export default function CardCarousel({
     },
   });
 
+  useEffect(() => {
+    if (goToIndex) {
+      ref.current.scrollTo({ x: goToIndex * CARD_WIDTH });
+    }
+  }, [goToIndex]);
+
   return (
-    <View className="flex-row items-center justify-center flex-1">
+    <View className="flex-row items-center justify-center flex-1 ">
       <Animated.ScrollView
+        ref={ref}
         horizontal
         showsHorizontalScrollIndicator={false}
         pagingEnabled
@@ -97,6 +105,7 @@ export default function CardCarousel({
         snapToInterval={CARD_WIDTH + 10}
         contentOffset={{ x: -SPACING_FOR_CARD_INSET }}
         snapToAlignment="center"
+        className="h-full py-5 "
         contentInset={{
           top: 0,
           left: SPACING_FOR_CARD_INSET,
@@ -123,7 +132,7 @@ export default function CardCarousel({
 const styles = StyleSheet.create({
   cardSizeStyle: {
     width: CARD_WIDTH,
-    height: CARD_HEIGHT,
+    height: "100%",
     marginHorizontal: MARGIN_FOR_CARD,
     marginBottom: 10,
   },

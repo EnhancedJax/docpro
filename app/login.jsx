@@ -49,15 +49,15 @@ export default function Index() {
             control={control}
             name="email"
             placeholder="Email"
-            className="mb-4"
-            textContentType="oneTimeCode"
+            twClass="mb-4"
+            textContentType="oneTimeCode" // fix ios issue
           />
           <Input
             type="password"
             placeholder="Password"
             control={control}
             name="password"
-            className="mb-4"
+            twClass="mb-4"
           />
           {currentScreen === "signup" && (
             <Input
@@ -70,7 +70,7 @@ export default function Index() {
         </View>
       )}
       <View>
-        {(currentScreen === "signup" || currentScreen === null) && (
+        {currentScreen === "signup" && (
           <Button
             className="mb-2"
             onPress={() => {
@@ -85,7 +85,7 @@ export default function Index() {
             Sign up
           </Button>
         )}
-        {(currentScreen === "login" || currentScreen === null) && (
+        {currentScreen === "login" && (
           <Button
             className="mb-2"
             onPress={() => {

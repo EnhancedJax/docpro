@@ -7,6 +7,53 @@ export const callGetMe = async () => {
     id: "123",
     email: "test@test.com",
     name: "hs",
+    documents: {
+      count: 1,
+      items: [
+        {
+          id: "1",
+          title: "Document 1",
+          type: 2,
+          date: new Date(),
+          status: 2,
+        },
+        {
+          id: "2",
+          title: "Document 2",
+          type: 0,
+          date: new Date(),
+          status: 1,
+        },
+        {
+          id: "3",
+          title: "Document 3",
+          type: 1,
+          date: new Date(),
+          status: 0,
+        },
+        {
+          id: "4",
+          title: "Document 4",
+          type: 1,
+          date: new Date(),
+          status: 0,
+        },
+        {
+          id: "5",
+          title: "Document 5",
+          type: 1,
+          date: new Date(),
+          status: 0,
+        },
+        {
+          id: "6",
+          title: "Document 6",
+          type: 1,
+          date: new Date(),
+          status: 0,
+        },
+      ],
+    },
   };
 
   if (response.id) {

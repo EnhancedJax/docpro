@@ -1,5 +1,7 @@
 export const ROUTE_ENTRY = "/";
 export const ROUTE_LOGIN = "/login";
 export const ROUTE_SIGNUP = "/signup";
-export const ROUTE_HOME = "/(app)/home";
-export const ROUTE_EDIT_USER = "/(app)/editUser";
+export const ROUTE_HOME = "/(app)/(tabs)";
+export const ROUTE_LIST = "/(app)/(tabs)/list";
+export const ROUTE_SETTINGS = "/(app)/settings";
+export const ROUTE_TEMPLATE = (id) => `/(app)/${id}`;

@@ -1,61 +1,55 @@
-import React, { useState } from "react";
-import { View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { Keyboard, View } from "react-native";
 import Button from "../../components/Button";
 import CardCarousel from "../../components/CardCarousel";
 import PageDots from "../../components/PageDots";
-import QuestionCard from "../../containers/template_QuestionCard";
+import QuestionCard from "../../components/QuestionCard";
+import useKeyboardOpen from "../../hooks/useKeyboardOpen";
 import { useTemplate, withTemplateProvider } from "../../providers/template";
-
-const Questions = [
-  {
-    question: "Are you a permanent resident of Hong Kong?",
-    description: "This is a description",
-    type: "radio",
-    options: ["Yes", "No"],
-  },
-  {
-    question: "What is your permanent address?",
-    description: "This is a description",
-    type: "text",
-  },
-  {
-    question: "What is your monthly income?",
-    description: "This is a description",
-    type: "number",
-  },
-  {
-    question: "When did your term start?",
-    description: "This is a description",
-    type: "date",
-  },
-  {
-    question: "Please select types of documents you have",
-    description: "This is a description",
-    type: "checkbox",
-    options: ["A", "B", "C"],
-  },
-];
-
 function Template() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const { handleBack, form, onSubmit, progress, showToast } = useTemplate();
+  const [goToIndex, setGoToIndex] = useState(null);
+  const {
+    questionItem,
+    handleSaveAsDraft,
+    handleSaveAndPay,
+    form,
+    progress,
+    showToast,
+  } = useTemplate();
   const {
     control,
-    handleSubmit,
     formState: { errors },
   } = form;
 
+  const isKeyboardOpen = useKeyboardOpen();
+  useEffect(() => {
+    Keyboard.dismiss();
+  }, [activeIndex]);
+
   return (
     <View className="flex-col flex-1 border-t border-b border-neutral-300">
-      <View className="flex-row p-6">
-        <Button type="secondary" onPress={handleBack} className="flex-1 mr-2">
+      <View className={`flex-row p-6 ${isKeyboardOpen ? "hidden" : ""}`}>
+        <Button
+          type="secondary"
+          onPress={handleSaveAsDraft}
+          className="flex-1 mr-2"
+        >
           Save as Draft
         </Button>
         <Button
-          type={progress === Questions.length ? "primary" : "inactive"}
+          type={
+            progress === questionItem.length || progress > activeIndex
+              ? "primary"
+              : "inactive"
+          }
           onPress={
-            progress === Questions.length
-              ? handleSubmit(onSubmit)
+            progress === questionItem.length
+              ? handleSaveAndPay
+              : progress > activeIndex
+              ? () => {
+                  setGoToIndex(activeIndex + 1);
+                }
               : () => {
                   showToast({
                     message: "You must answer all questions.",
@@ -66,12 +60,17 @@ function Template() {
           allowAction
           className="flex-1 ml-2"
         >
-          Finish
+          {progress === questionItem.length ? "Finish" : "Next"}
         </Button>
       </View>
-      <CardCarousel activeIndex={activeIndex} setActiveIndex={setActiveIndex}>
-        {Questions.filter((_, index) => index <= progress).map(
-          (question, index) => (
+      <CardCarousel
+        activeIndex={activeIndex}
+        setActiveIndex={setActiveIndex}
+        goToIndex={goToIndex}
+      >
+        {questionItem
+          .filter((_, index) => index <= progress)
+          .map((question, index) => (
             <QuestionCard
               key={`Question${index}`}
               index={index}
@@ -79,13 +78,12 @@ function Template() {
               control={control}
               errors={errors}
             />
-          )
-        )}
+          ))}
       </CardCarousel>
-      <View className="flex-row w-full h-10">
+      <View className="flex-row w-full h-10 mb-2 ">
         <PageDots
           activeIndex={activeIndex}
-          totalPages={Questions.length}
+          totalPages={questionItem.length}
           progress={progress}
         />
       </View>

@@ -6,8 +6,8 @@ import { useLoader } from "../components/loader";
 import Pressable from "../components/Pressable";
 import Text from "../components/Text";
 import { useToast } from "../components/toast";
-import { DOCUMENT_TYPES } from "../constants";
 import Colors from "../constants/color";
+import { ROUTE_TEMPLATE } from "../constants/routes";
 
 export default function SwipeListItem({ item }) {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
@@ -19,7 +19,7 @@ export default function SwipeListItem({ item }) {
       onPress={async () => {
         switch (item.status) {
           case 0:
-            router.push(`./${item.id}`);
+            router.push(ROUTE_TEMPLATE(item.id));
             break;
           case 2:
             break;
@@ -60,9 +60,7 @@ export default function SwipeListItem({ item }) {
           )}
           <View className="mb-3">
             <Text twClass="text-base">{item.title}</Text>
-            <Text twClass="text-tgray text-sm">
-              {DOCUMENT_TYPES[item.type]}
-            </Text>
+            <Text twClass="text-tgray text-sm">{item.type}</Text>
           </View>
           <View className="flex flex-row">
             <Clock size={16} color={Colors.tgray} />

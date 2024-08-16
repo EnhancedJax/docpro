@@ -1,8 +1,14 @@
 import { useRef, useState } from "react";
 import { Animated, Pressable as RNPressable } from "react-native";
 
-export default function Pressable({ children, ...props }) {
+export default function Pressable({
+  children,
+  onPress = () => {},
+  cooldown = 0,
+  ...props
+}) {
   const [isPressed, setIsPressed] = useState(false);
+  const [isDisabled, setIsDisabled] = useState(false);
   const scaleAnim = useRef(new Animated.Value(1)).current;
   const opacityAnim = useRef(new Animated.Value(1)).current;
 
@@ -34,8 +40,21 @@ export default function Pressable({ children, ...props }) {
     ]).start();
   };
 
+  const handlePress = () => {
+    if (!isDisabled) {
+      onPress();
+    }
+    if (cooldown > 0) {
+      setIsDisabled(true);
+      setTimeout(() => {
+        setIsDisabled(false);
+      }, cooldown);
+    }
+  };
+
   return (
     <RNPressable
+      onPress={handlePress}
       {...props}
       onPressIn={handlePressIn}
       onPressOut={handlePressOut}

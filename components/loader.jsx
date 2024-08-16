@@ -5,7 +5,6 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from "react-native-reanimated";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const LoaderContext = createContext();
 
@@ -26,7 +25,6 @@ export const LoaderProvider = ({ children }) => {
 };
 
 const Loader = ({ visible }) => {
-  const insets = useSafeAreaInsets();
   const animatedStyle = useAnimatedStyle(() => {
     return {
       opacity: withTiming(visible ? 1 : 0, {
@@ -42,7 +40,7 @@ const Loader = ({ visible }) => {
         animatedStyle,
         {
           position: "absolute",
-          top: insets.top,
+          top: 0,
           left: 0,
           right: 0,
           bottom: 0,

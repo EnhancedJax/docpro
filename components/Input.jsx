@@ -5,8 +5,12 @@ import { TextInput, TouchableOpacity, View } from "react-native";
 
 export default function Input({
   type = "text",
+  rules = null,
   control = null,
   name = null,
+  light = false,
+  medium = false,
+  bold = false,
   ...props
 }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -41,16 +45,34 @@ export default function Input({
     );
   }
 
+  if (type === "bare") {
+    return (
+      <TextInput
+        className={`p-3 text-base rounded-full bg-gray ${props.twClass}`}
+        {...props}
+      />
+    );
+  }
+
   return (
     <Controller
       control={control}
       render={({ field: { onChange, onBlur, value } }) => (
         <TextInput
-          className="p-3 text-base rounded-full bg-gray"
+          className={`p-3 text-base rounded-full bg-gray ${props.twClass}`}
           {...props}
           value={value}
           onChangeText={onChange}
           onBlur={onBlur}
+          style={{
+            fontFamily: light
+              ? "Ubuntu_300Light"
+              : medium
+              ? "Ubuntu_500Medium"
+              : bold
+              ? "Ubuntu_700Bold"
+              : "Ubuntu_400Regular",
+          }}
         />
       )}
       name={name}

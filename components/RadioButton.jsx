@@ -1,31 +1,32 @@
+import { Circle } from "lucide-react-native";
 import React from "react";
-import { TouchableOpacity, View } from "react-native";
+import { View } from "react-native";
+import Pressable from "./Pressable";
 import Text from "./Text";
 
-const RadioButton = ({ value, selected, onSelect }) => (
-  <TouchableOpacity
-    onPress={() => onSelect(value)}
-    className="flex-row items-center mb-2"
-  >
-    <View
-      className={`w-5 h-5 rounded-full border-2 ${
-        selected ? "border-blue-500" : "border-gray-400"
-      } mr-2 items-center justify-center`}
-    >
-      {selected && <View className="w-3 h-3 bg-blue-500 rounded-full" />}
+const RadioButton = ({ text, status, onPress }) => (
+  <Pressable onPress={onPress}>
+    <View className="flex flex-row items-center p-2 mb-3 rounded-full bg-gray">
+      <View
+        className={`rounded-full w-10 h-10 flex items-center justify-center mr-4 ${
+          status ? "bg-primary" : "bg-text10"
+        }`}
+      >
+        <Circle size={20} color="white" />
+      </View>
+      <Text twClass="text-base">{text}</Text>
     </View>
-    <Text>{value}</Text>
-  </TouchableOpacity>
+  </Pressable>
 );
 
-const RadioButtonGroup = ({ options, value, onValueChange }) => (
-  <View>
+const RadioButtonGroup = ({ options, value, onValueChange, ...props }) => (
+  <View {...props}>
     {options.map((option) => (
       <RadioButton
         key={option}
-        value={option}
-        selected={value === option}
-        onSelect={onValueChange}
+        text={option}
+        status={value === option}
+        onPress={() => onValueChange(option)}
       />
     ))}
   </View>

@@ -2,7 +2,7 @@ import { router } from "expo-router";
 import { View } from "react-native";
 import Button from "../../../components/Button";
 import Text from "../../../components/Text";
-import { ROUTE_EDIT_USER } from "../../../constants/routes";
+import { ROUTE_SETTINGS } from "../../../constants/routes";
 import { useAuthContext } from "../../../providers/auth";
 
 export default function EditUser() {
@@ -18,7 +18,7 @@ export default function EditUser() {
       <View className="px-6 pb-12">
         <Button
           onPress={() => {
-            router.push(`${ROUTE_EDIT_USER}/editBasic`);
+            router.push(`${ROUTE_SETTINGS}/editBasic`);
           }}
           cooldown={1000}
           type="secondary"
