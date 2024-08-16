@@ -9,7 +9,7 @@ import { ROUTE_SIGNUP } from "../constants/routes";
 import { useAuthContext } from "../providers/auth";
 
 export default function Index() {
-  const [currentScreen, setCurrentScreen] = useState(null);
+  const [currentScreen, setCurrentScreen] = useState("login");
   const { control, handleSubmit } = useForm({
     defaultValues: {
       email: "",
@@ -44,7 +44,7 @@ export default function Index() {
         </Text>
       </View>
       {currentScreen !== null && (
-        <View className="mb-12">
+        <View className="mb-8">
           <Input
             control={control}
             name="email"
@@ -101,7 +101,7 @@ export default function Index() {
         )}
         {currentScreen !== null && (
           <View className="flex flex-row justify-center">
-            <Text>
+            <Text twClass="text-base">
               {currentScreen === "signup"
                 ? "Already have an account?"
                 : "Don't have an account?"}
@@ -115,7 +115,7 @@ export default function Index() {
                 }
               }}
             >
-              <Text twClass="ml-2 text-softPrimary" medium>
+              <Text twClass="ml-2 text-softPrimary text-base" medium>
                 {currentScreen === "signup" ? "Login" : "Sign up"}
               </Text>
             </TouchableOpacity>

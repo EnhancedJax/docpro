@@ -15,7 +15,7 @@ export default function QueryClientProvider({ children }) {
       onError: (error) => {
         showToast({
           type: "error",
-          message: "Something went wrong",
+          message: error.message,
         });
       },
       onMutate: (mutation) => {

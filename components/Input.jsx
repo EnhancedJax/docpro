@@ -19,13 +19,13 @@ export default function Input({
           <View className="relative">
             <TextInput
               secureTextEntry={!showPassword}
-              className="p-3 pr-10 rounded-full bg-gray"
+              className="p-3 pr-10 text-base rounded-full bg-gray"
               {...props}
               value={value}
               onChangeText={onChange}
               onBlur={onBlur}
             />
-            <View className="absolute flex items-center justify-center h-10 right-3">
+            <View className="absolute flex items-center justify-center h-12 right-3">
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                 {showPassword ? (
                   <EyeOff size={20} color="#8696BB" />
@@ -46,7 +46,7 @@ export default function Input({
       control={control}
       render={({ field: { onChange, onBlur, value } }) => (
         <TextInput
-          className="p-3 rounded-full bg-gray"
+          className="p-3 text-base rounded-full bg-gray"
           {...props}
           value={value}
           onChangeText={onChange}

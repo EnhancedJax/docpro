@@ -20,7 +20,7 @@ export const AuthProvider = ({ children }) => {
     AsyncStorage.setItem("refreshToken", data.refreshToken);
     showToast({
       type: "success",
-      message: "Successfully signed up",
+      message: "Successfully logged in",
     });
     popNavigation();
     router.replace(ROUTE_HOME);
@@ -49,6 +49,10 @@ export const AuthProvider = ({ children }) => {
       queryClient.setQueryData(["token"], null);
       await AsyncStorage.removeItem("token");
       await AsyncStorage.removeItem("refreshToken");
+      showToast({
+        type: "success",
+        message: "Successfully logged out",
+      });
       router.replace(ROUTE_ENTRY);
     } catch (error) {
       console.error("Error removing token:", error);

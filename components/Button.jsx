@@ -32,7 +32,7 @@ export default function Button({
         className="flex items-center py-3 rounded-full bg-tgray"
         {...props}
       >
-        <Text twClass="text-white">{content}</Text>
+        <Text twClass="text-base text-white">{content}</Text>
       </Pressable>
     );
   } else if (type === "inactive") {
@@ -42,7 +42,7 @@ export default function Button({
         onPress={allowAction ? handlePress : () => {}}
         {...props}
       >
-        <Text twClass="text-text10">{content}</Text>
+        <Text twClass="text-base text-text10">{content}</Text>
       </Pressable>
     );
   } else {
@@ -52,7 +52,7 @@ export default function Button({
         className="flex items-center py-3 rounded-full bg-primary"
         {...props}
       >
-        <Text twClass="text-white">{content}</Text>
+        <Text twClass="text-base text-white">{content}</Text>
       </Pressable>
     );
   }

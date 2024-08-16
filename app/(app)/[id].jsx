@@ -1,65 +1,49 @@
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { View } from "react-native";
 import Button from "../../components/Button";
 import CardCarousel from "../../components/CardCarousel";
 import PageDots from "../../components/PageDots";
-import Text from "../../components/Text";
-import { useToast } from "../../components/toast";
-import { ROUTE_HOME } from "../../constants/routes";
-import popNavigation from "../../utils/popNavigation";
+import QuestionCard from "../../containers/template_QuestionCard";
+import { useTemplate, withTemplateProvider } from "../../providers/template";
 
 const Questions = [
   {
-    question: "What is the capital of France?",
+    question: "Are you a permanent resident of Hong Kong?",
     description: "This is a description",
+    type: "radio",
+    options: ["Yes", "No"],
   },
   {
-    question: "What is the capital of France?",
+    question: "What is your permanent address?",
     description: "This is a description",
+    type: "text",
   },
   {
-    question: "What is the capital of France?",
+    question: "What is your monthly income?",
     description: "This is a description",
+    type: "number",
   },
   {
-    question: "What is the capital of France?",
+    question: "When did your term start?",
     description: "This is a description",
+    type: "date",
+  },
+  {
+    question: "Please select types of documents you have",
+    description: "This is a description",
+    type: "checkbox",
+    options: ["A", "B", "C"],
   },
 ];
 
-export default function Document() {
-  const { id } = useLocalSearchParams();
-  const navigation = useNavigation();
-  const { showToast } = useToast();
+function Template() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [progress, setProgress] = useState(0);
-  const [prematureHandledRemove, setPrematureHandledRemove] = useState(false);
-
-  const handleBack = () => {
-    navigation.goBack();
-  };
-
-  const handleOnRemove = () => {
-    showToast({
-      message: "Saved!",
-      type: "success",
-    });
-  };
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("beforeRemove", (e) => {
-      if (!prematureHandledRemove) {
-        handleOnRemove();
-      }
-    });
-
-    return unsubscribe;
-  }, [navigation]);
-
-  useEffect(() => {
-    console.log(id);
-  }, []);
+  const { handleBack, form, onSubmit, progress, showToast } = useTemplate();
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+  } = form;
 
   return (
     <View className="flex-col flex-1 border-t border-b border-neutral-300">
@@ -71,19 +55,7 @@ export default function Document() {
           type={progress === Questions.length ? "primary" : "inactive"}
           onPress={
             progress === Questions.length
-              ? () => {
-                  console.log("finish");
-                  handleOnRemove();
-                  setPrematureHandledRemove(true);
-                  popNavigation();
-                  router.replace({
-                    pathname: ROUTE_HOME,
-                    params: {
-                      finished: true,
-                      finishedId: id,
-                    },
-                  });
-                }
+              ? handleSubmit(onSubmit)
               : () => {
                   showToast({
                     message: "You must answer all questions.",
@@ -104,7 +76,8 @@ export default function Document() {
               key={`Question${index}`}
               index={index}
               question={question}
-              setProgress={setProgress}
+              control={control}
+              errors={errors}
             />
           )
         )}
@@ -120,14 +93,4 @@ export default function Document() {
   );
 }
 
-function QuestionCard({ question, setProgress, index }) {
-  const handleProgress = () => {
-    setProgress((prev) => (index === prev ? index + 1 : prev));
-  };
-  return (
-    <View className="flex-col items-center justify-center w-full h-full">
-      <Text>{question.question}</Text>
-      <Button onPress={handleProgress}>Hello</Button>
-    </View>
-  );
-}
+export default withTemplateProvider(Template);
