@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import {
   Dimensions,
-  Platform,
   Pressable as RNPressable,
   StyleSheet,
   View,
@@ -103,27 +102,24 @@ export default function CardCarousel({
   }, [goToIndex]);
 
   return (
-    <View className="flex-row items-center justify-center flex-1 ">
+    <View
+      className="flex-row items-center justify-center flex-1 "
+      style={{
+        paddingLeft: SPACING_FOR_CARD_INSET,
+        paddingRight: SPACING_FOR_CARD_INSET,
+        overflow: "visible",
+      }}
+    >
       <Animated.ScrollView
         ref={ref}
         horizontal
         showsHorizontalScrollIndicator={false}
-        pagingEnabled
-        decelerationRate={0}
+        decelerationRate={0.9}
         disableIntervalMomentum
-        snapToInterval={CARD_WIDTH + 10}
-        contentOffset={{ x: -SPACING_FOR_CARD_INSET }}
-        snapToAlignment="center"
+        snapToInterval={CARD_WIDTH + MARGIN_FOR_CARD}
         className="h-full py-5 "
-        contentInset={{
-          top: 0,
-          left: SPACING_FOR_CARD_INSET,
-          bottom: 0,
-          right: SPACING_FOR_CARD_INSET,
-        }}
-        contentContainerStyle={{
-          paddingHorizontal:
-            Platform.OS === "android" ? SPACING_FOR_CARD_INSET : 0,
+        style={{
+          overflow: "visible",
         }}
         onScroll={scrollHandler}
         scrollEventThrottle={16}
@@ -142,7 +138,7 @@ const styles = StyleSheet.create({
   cardSizeStyle: {
     width: CARD_WIDTH,
     height: "100%",
-    marginHorizontal: MARGIN_FOR_CARD,
+    marginRight: MARGIN_FOR_CARD,
     marginBottom: 10,
   },
 });

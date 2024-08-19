@@ -47,7 +47,7 @@ export default function QuestionCard({
                     : new Date()
                 }
                 mode="date"
-                display="spinner"
+                // display="spinner"
                 onChange={(event, selectedDate) => {
                   onChange(selectedDate);
                 }}

@@ -58,23 +58,23 @@ function TemplateProvider({ children }) {
         type: "radio",
         options: ["Yes", "No"],
       },
-      // {
-      //   question: "When did your term start?",
-      //   description: "This is a description",
-      //   type: "date",
-      // },
-      // {
-      //   question: "What is your permanent address?",
-      //   description: "This is a description",
-      //   type: "text",
-      //   placeholder: "Enter your address",
-      // },
-      // {
-      //   question: "What is your monthly income?",
-      //   description: "This is a description",
-      //   type: "number",
-      //   placeholder: "Enter your monthly income",
-      // },
+      {
+        question: "When did your term start?",
+        description: "This is a description",
+        type: "date",
+      },
+      {
+        question: "What is your permanent address?",
+        description: "This is a description",
+        type: "text",
+        placeholder: "Enter your address",
+      },
+      {
+        question: "What is your monthly income?",
+        description: "This is a description",
+        type: "number",
+        placeholder: "Enter your monthly income",
+      },
     ];
   }, [defaultName]);
 
