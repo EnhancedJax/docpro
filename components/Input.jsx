@@ -26,7 +26,7 @@ export default function Input({
   const renderTextInput = (field) => (
     <TextInput
       secureTextEntry={type === "password" && !showPassword}
-      className={`px-3 p-3 text-base rounded-full bg-gray ${
+      className={`px-3 p-4 text-base rounded-full bg-gray ${
         type === "password" ? "pr-10" : ""
       } ${type === "password" ? "" : props.twClass || ""}`}
       {...props}

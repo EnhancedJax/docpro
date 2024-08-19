@@ -22,7 +22,7 @@ export default function RootLayout() {
       }}
     >
       <Stack.Screen name="index" />
-      <Stack.Screen name="editBasic" />
+      <Stack.Screen name="edit" />
     </Stack>
   );
 }

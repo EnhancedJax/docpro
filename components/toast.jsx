@@ -1,4 +1,4 @@
-import { AlertCircle, CheckCircle, Info, XCircle } from "lucide-react-native";
+import { CheckCircle, Info, XCircle } from "lucide-react-native";
 import React, { createContext, useContext, useState } from "react";
 import { View } from "react-native";
 import Animated, {
@@ -7,6 +7,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import Colors from "../constants/color";
 import Text from "./Text";
 
 const ToastContext = createContext();
@@ -57,13 +58,11 @@ const Toast = ({ visible, message, type }) => {
   const getIcon = () => {
     switch (type) {
       case "success":
-        return <CheckCircle size={24} color="#10B981" />;
+        return <CheckCircle size={24} color={Colors.success} />;
       case "error":
-        return <XCircle size={24} color="#EF4444" />;
-      case "warning":
-        return <AlertCircle size={24} color="#F59E0B" />;
+        return <XCircle size={24} color={Colors.error} />;
       default:
-        return <Info size={24} color="#3B82F6" />;
+        return <Info size={24} color={Colors.primary} />;
     }
   };
 

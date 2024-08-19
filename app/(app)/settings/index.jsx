@@ -1,16 +1,25 @@
 import { StackActions } from "@react-navigation/native";
+import { useQuery } from "@tanstack/react-query";
 import { router, useNavigationContainerRef } from "expo-router";
+import { PenLine } from "lucide-react-native";
 import { View } from "react-native";
+import { callGetMe } from "../../../api/user";
 import Button from "../../../components/Button";
+import Loader from "../../../components/loader";
 import Pressable from "../../../components/Pressable";
 import Text from "../../../components/Text";
-import { ROUTE_LOGIN, ROUTE_SETTINGS } from "../../../constants/routes";
-import { FIELDS } from "../../../constants/user";
+import Colors from "../../../constants/color";
+import { ROUTE_LOGIN, ROUTE_SETTINGS_EDIT } from "../../../constants/routes";
+import { EMAIL_FIELD, FIELDS } from "../../../constants/user";
 import { useAuth } from "../../../providers/auth";
 
 export default function EditUser() {
   const { logout } = useAuth();
   const rootNavigation = useNavigationContainerRef();
+  const { data = {}, isFetched } = useQuery({
+    queryKey: ["me"],
+    queryFn: callGetMe,
+  });
 
   const popNavigation = () => {
     if (rootNavigation?.canGoBack()) {
@@ -29,21 +38,35 @@ export default function EditUser() {
     }
   };
 
+  if (!isFetched) return <Loader visible />;
+
   return (
     <View className="flex-1 bg-white">
       <View className="flex-1 px-6">
-        {[
-          ...FIELDS,
-          {
-            displayName: "Email",
-            type: "text",
-          },
-        ].map((field, index) => {
+        {[EMAIL_FIELD, ...FIELDS].map((field, index) => {
+          const isEmail = field.key === "email";
           return (
             <View key={index}>
               <Text twClass="text-base">{field.displayName}</Text>
-              <Pressable className="p-3 mt-2 mb-4 text-base rounded-full bg-gray">
-                <Text twClass="text-base">Change</Text>
+              <Pressable
+                className="relative p-3 mt-2 mb-4 text-base rounded-full bg-gray"
+                onPress={() => {
+                  router.push({
+                    pathname: ROUTE_SETTINGS_EDIT,
+                    params: {
+                      index: isEmail ? -1 : index - 1,
+                      value: isEmail ? data[field.key] : data[field.key],
+                      isPassword: "false",
+                    },
+                  });
+                }}
+              >
+                <View className="absolute flex-row items-center h-full ">
+                  <PenLine size={16} color={Colors.text} />
+                </View>
+                <Text twClass="text-base ml-8">
+                  {isEmail ? data[field.key] : data[field.key]}
+                </Text>
               </Pressable>
             </View>
           );
@@ -52,16 +75,13 @@ export default function EditUser() {
       <View className="px-6 pb-12">
         <Button
           onPress={() => {
-            router.push(`${ROUTE_SETTINGS}/editBasic`);
+            router.push({
+              pathname: ROUTE_SETTINGS_EDIT,
+              params: {
+                isPassword: "true",
+              },
+            });
           }}
-          cooldown={1000}
-          type="secondary"
-          className="mb-2"
-        >
-          Change email
-        </Button>
-        <Button
-          onPress={() => {}}
           cooldown={1000}
           type="secondary"
           className="mb-2"

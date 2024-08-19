@@ -1,5 +1,6 @@
 import { useCallback, useState } from "react";
-import { Pressable } from "react-native";
+import { View } from "react-native";
+import Pressable from "./Pressable";
 import Text from "./Text";
 
 export default function Button({
@@ -27,32 +28,26 @@ export default function Button({
 
   if (type === "secondary") {
     return (
-      <Pressable
-        onPress={handlePress}
-        className="flex items-center py-3 rounded-full bg-tgray"
-        {...props}
-      >
-        <Text twClass="text-base text-white">{content}</Text>
+      <Pressable onPress={handlePress} {...props}>
+        <View className="flex items-center py-3 rounded-full bg-tgray">
+          <Text twClass="text-base text-white">{content}</Text>
+        </View>
       </Pressable>
     );
   } else if (type === "inactive") {
     return (
-      <Pressable
-        className="flex items-center py-3 rounded-full bg-gray"
-        onPress={allowAction ? handlePress : () => {}}
-        {...props}
-      >
-        <Text twClass="text-base text-text10">{content}</Text>
+      <Pressable onPress={allowAction ? handlePress : () => {}} {...props}>
+        <View className="flex items-center py-3 rounded-full bg-gray">
+          <Text twClass="text-base text-text10">{content}</Text>
+        </View>
       </Pressable>
     );
   } else {
     return (
-      <Pressable
-        onPress={handlePress}
-        className="flex items-center py-3 rounded-full bg-primary"
-        {...props}
-      >
-        <Text twClass="text-base text-white">{content}</Text>
+      <Pressable onPress={handlePress} {...props}>
+        <View className="flex items-center py-3 rounded-full bg-primary">
+          <Text twClass="text-base text-white">{content}</Text>
+        </View>
       </Pressable>
     );
   }

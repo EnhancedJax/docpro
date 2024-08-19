@@ -7,7 +7,14 @@ import Input from "../components/Input";
 import { RadioButtonGroup } from "../components/RadioButton";
 import Text from "../components/Text";
 
-export default function QuestionCard({ question, index, control, errors }) {
+export default function QuestionCard({
+  question,
+  index,
+  control,
+  errors,
+  children,
+  ...props
+}) {
   const renderInput = () => {
     switch (question.type) {
       case "text":
@@ -32,7 +39,9 @@ export default function QuestionCard({ question, index, control, errors }) {
             rules={{ required: true }}
             render={({ field: { onChange, value } }) => (
               <DateTimePicker
-                value={value || new Date()}
+                value={
+                  value instanceof Date ? value : new Date(value) || new Date()
+                }
                 mode="date"
                 display="spinner"
                 onChange={(event, selectedDate) => {
@@ -92,7 +101,7 @@ export default function QuestionCard({ question, index, control, errors }) {
   };
 
   return (
-    <View className="flex-col w-full h-full p-4">
+    <View className="flex-col w-full h-full p-4" {...props}>
       <Text bold twClass="mb-2 text-xl">
         {question.question}
       </Text>
@@ -101,8 +110,11 @@ export default function QuestionCard({ question, index, control, errors }) {
       )}
       {renderInput()}
       {errors[index.toString()] && (
-        <Text twClass="mt-2 text-red-500">This field is required.</Text>
+        <Text twClass="mt-2 text-red-500">
+          {errors[index.toString()].message || "This field is required."}
+        </Text>
       )}
+      {children}
     </View>
   );
 }

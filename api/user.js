@@ -7,6 +7,8 @@ export const callGetMe = async () => {
     id: "123",
     email: "test@test.com",
     name: "hs",
+    gender: "male",
+    dob: "1990-01-01",
     documents: {
       count: 1,
       items: [
