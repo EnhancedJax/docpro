@@ -1,90 +1,112 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { router } from "expo-router";
-import React, { createContext, useCallback, useContext } from "react";
-import { callLoginUser, callSignupUser } from "../api/auth";
-import { useToast } from "../components/toast";
-import { ROUTE_ENTRY, ROUTE_HOME } from "../constants/routes";
-import popNavigation from "../utils/popNavigation";
+import { createContext, useContext, useEffect, useRef, useState } from "react";
+import { api } from "../api";
+import {
+  callLoginUser,
+  callLogoutUser,
+  callRefreshToken,
+  callSignupUser,
+} from "../api/auth";
+import { ACCESS_TOKEN_TIMEOUT, REFRESH_TOKEN_KEY } from "../constants";
 
-const AuthContext = createContext();
+const AuthContext = createContext(null);
+export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const queryClient = useQueryClient();
-  const { showToast } = useToast();
-
-  const getNewSession = useCallback(async (data) => {
-    console.log(data);
-    queryClient.setQueryData(["token"], data.token);
-    AsyncStorage.setItem("token", data.token);
-    AsyncStorage.setItem("refreshToken", data.refreshToken);
-    showToast({
-      type: "success",
-      message: "Successfully logged in",
-    });
-    popNavigation();
-    router.replace(ROUTE_HOME);
-  }, []);
+  const refreshTimerRef = useRef(null);
+  const [accessToken, setAccessToken] = useState(0); // 0 means not set yet (null means no access token)
 
   const loginMutation = useMutation({
     mutationFn: callLoginUser,
-    onSuccess: getNewSession,
+    onMutate: () => {
+      setAccessToken(0);
+    },
+    onSuccess: async (data) => {
+      setAccessToken(data.accessToken);
+      await AsyncStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
+      scheduleTokenRefresh();
+    },
   });
 
   const signupMutation = useMutation({
     mutationFn: callSignupUser,
-    onSuccess: getNewSession,
+    onMutate: () => {
+      setAccessToken(0);
+    },
+    onSuccess: async (data) => {
+      setAccessToken(data.accessToken);
+      await AsyncStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
+      scheduleTokenRefresh();
+    },
   });
 
-  const login = async (data) => {
-    loginMutation.mutate(data);
+  const logoutMutation = useMutation({
+    mutationFn: callLogoutUser,
+    onSuccess: async () => {
+      setAccessToken(null);
+      await AsyncStorage.removeItem(REFRESH_TOKEN_KEY);
+      clearTimeout(refreshTimerRef.current);
+      api.defaults.headers.common["Authorization"] = "";
+    },
+  });
+
+  const refreshMutation = useMutation({
+    mutationFn: callRefreshToken,
+    onSuccess: (data) => {
+      setAccessToken(data.accessToken);
+      scheduleTokenRefresh();
+    },
+    onError: () => {
+      // If refresh fails, log out the user
+      logout();
+    },
+  });
+
+  const login = (credentials) => loginMutation.mutate(credentials);
+  const signup = (userData) => signupMutation.mutate(userData);
+  const logout = () => logoutMutation.mutate();
+
+  const scheduleTokenRefresh = () => {
+    clearTimeout(refreshTimerRef.current);
+    refreshTimerRef.current = setTimeout(() => {
+      refreshMutation.mutate();
+    }, ACCESS_TOKEN_TIMEOUT - 5000); // Refresh 5 seconds before expiration
   };
 
-  const signup = async (data) => {
-    signupMutation.mutate(data);
+  const manualRefresh = () => {
+    return refreshMutation.mutateAsync();
   };
 
-  const logout = async () => {
-    try {
-      queryClient.setQueryData(["token"], null);
-      await AsyncStorage.removeItem("token");
-      await AsyncStorage.removeItem("refreshToken");
-      showToast({
-        type: "success",
-        message: "Successfully logged out",
-      });
-      router.replace(ROUTE_ENTRY);
-    } catch (error) {
-      console.error("Error removing token:", error);
-    }
-  };
-
-  const loginWithLastSession = async () => {
-    try {
-      const storedToken = await AsyncStorage.getItem("token");
-      if (storedToken) {
-        queryClient.setQueryData(["token"], storedToken);
+  useEffect(() => {
+    const initAuth = async () => {
+      const storedRefreshToken = await AsyncStorage.getItem(REFRESH_TOKEN_KEY);
+      if (storedRefreshToken) {
+        refreshMutation.mutate();
+      } else {
+        setAccessToken(null);
       }
-      return storedToken;
-    } catch (error) {
-      console.error("Error retrieving token:", error);
-      return null;
+    };
+    initAuth();
+    return () => clearTimeout(refreshTimerRef.current);
+  }, []);
+
+  useEffect(() => {
+    if (accessToken) {
+      api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+    } else {
+      delete api.defaults.headers.common["Authorization"];
     }
+  }, [accessToken]);
+
+  const value = {
+    accessToken,
+    login,
+    signup,
+    logout,
+    refreshToken: manualRefresh,
   };
 
-  return (
-    <AuthContext.Provider
-      value={{ login, logout, loginWithLastSession, signup }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
-};
-
-export const useAuthContext = () => {
-  const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuthContext must be used within an AuthProvider");
-  }
-  return context;
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

@@ -1,4 +1,10 @@
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { StackActions } from "@react-navigation/native";
+import {
+  router,
+  useLocalSearchParams,
+  useNavigation,
+  useNavigationContainerRef,
+} from "expo-router";
 import React, {
   createContext,
   useContext,
@@ -10,7 +16,6 @@ import { useForm } from "react-hook-form";
 import { useLoader } from "../components/loader";
 import { useToast } from "../components/toast";
 import { ROUTE_LIST } from "../constants/routes";
-import popNavigation from "../utils/popNavigation";
 
 const TemplateContext = createContext();
 export const useTemplate = () => useContext(TemplateContext);
@@ -24,6 +29,13 @@ function TemplateProvider({ children }) {
   const [progress, setProgress] = useState(0);
   const form = useForm({});
   const { watch, getValues } = form;
+  const rootNavigation = useNavigationContainerRef();
+
+  const popNavigation = () => {
+    if (rootNavigation?.canGoBack()) {
+      rootNavigation.dispatch(StackActions.popToTop());
+    }
+  };
 
   const questionItem = useMemo(() => {
     return [

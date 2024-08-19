@@ -2,29 +2,20 @@ import { useQueryClient } from "@tanstack/react-query";
 import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
 import { callGetMe } from "../api/user";
-import Loader from "../components/loader";
-import { ROUTE_HOME, ROUTE_LOGIN, ROUTE_SIGNUP } from "../constants/routes";
-import { useAuthContext } from "../providers/auth";
+import { ROUTE_HOME, ROUTE_LIST, ROUTE_LOGIN } from "../constants/routes";
+import { useAuth } from "../providers/auth";
 
 export default function Index() {
-  const { loginWithLastSession } = useAuthContext();
+  const { accessToken } = useAuth();
   const [authState, setAuthState] = useState({
+    hasDocuments: false,
     isLoading: true,
-    token: null,
-    isSignedUp: null,
   });
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    const fetchData = async () => {
+    const init = async () => {
       try {
-        const token = await loginWithLastSession();
-
-        if (!token) {
-          setAuthState({ isLoading: false, token: null, isSignedUp: null });
-          return;
-        }
-
         const { data: meData } = await queryClient.fetchQuery({
           queryKey: ["me"],
           queryFn: callGetMe,
@@ -32,29 +23,34 @@ export default function Index() {
 
         setAuthState({
           isLoading: false,
-          token,
-          isSignedUp: meData?.name !== null,
+          hasDocuments: meData?.documents.count > 0,
         });
       } catch (error) {
         console.error("Error fetching user data:", error);
-        setAuthState({ isLoading: false, token: null, isSignedUp: null });
+        setAuthState({ isLoading: false, hasDocuments: false });
       } finally {
       }
     };
 
-    fetchData();
-  }, [loginWithLastSession, queryClient]);
+    console.log(accessToken);
+    if (accessToken === 0) return;
+    if (accessToken) {
+      init();
+    } else {
+      setAuthState({ isLoading: false, hasDocuments: false });
+    }
+  }, [accessToken]);
 
   if (authState.isLoading) {
-    return <Loader visible />;
+    return null;
   }
 
-  if (!authState.token) {
+  if (!accessToken) {
     return <Redirect href={ROUTE_LOGIN} />;
   }
 
-  if (!authState.isSignedUp) {
-    return <Redirect href={ROUTE_SIGNUP} />;
+  if (!authState.hasDocuments) {
+    return <Redirect href={ROUTE_LIST} />;
   }
 
   return <Redirect href={ROUTE_HOME} />;

@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { Cog, SquarePlus } from "lucide-react-native";
+import { ArrowRight, Cog } from "lucide-react-native";
 import { ScrollView, View } from "react-native";
 import { callGetDocumentTypes } from "../../../api/document";
 import GradientMask from "../../../components/GradientMask";
@@ -21,7 +21,7 @@ export default function New() {
   }
 
   return (
-    <View className="flex-col flex-1 pt-8 bg-white border-t border-b border-neutral-200">
+    <View className="flex-col flex-1 pt-8 bg-white border-b border-neutral-200">
       <View className="flex flex-row items-center px-6 mb-4">
         <View className="flex-1">
           <Text bold twClass="text-4xl">
@@ -52,9 +52,9 @@ export default function New() {
                     }}
                     cooldown={1000}
                   >
-                    <View className="flex flex-row w-full p-5 mb-3 bg-softPrimary10 rounded-3xl">
+                    <View className="flex flex-row w-full p-5 mb-3 border bg-secondary10 border-secondary rounded-xl">
                       <View className="flex-1">
-                        <Text bold twClass="text-xl">
+                        <Text medium twClass="text-xl">
                           {type.name}
                         </Text>
                         <Text light twClass="text-base mt-2">
@@ -62,7 +62,7 @@ export default function New() {
                         </Text>
                       </View>
                       <View className="flex justify-center ml-3">
-                        <SquarePlus size={24} color={Colors.softPrimary} />
+                        <ArrowRight size={24} color={Colors.tgray} />
                       </View>
                     </View>
                   </Pressable>

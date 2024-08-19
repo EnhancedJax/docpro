@@ -15,21 +15,40 @@ export default function Input({
 }) {
   const [showPassword, setShowPassword] = useState(false);
 
-  if (type === "password") {
-    return (
-      <Controller
-        control={control}
-        render={({ field: { onChange, onBlur, value } }) => (
-          <View className="relative">
-            <TextInput
-              secureTextEntry={!showPassword}
-              className="p-3 pr-10 text-base rounded-full bg-gray"
-              {...props}
-              value={value}
-              onChangeText={onChange}
-              onBlur={onBlur}
-            />
-            <View className="absolute flex items-center justify-center h-12 right-3">
+  const fontFamily = light
+    ? "Ubuntu_300Light"
+    : medium
+    ? "Ubuntu_500Medium"
+    : bold
+    ? "Ubuntu_700Bold"
+    : "Ubuntu_400Regular";
+
+  const renderTextInput = (field) => (
+    <TextInput
+      secureTextEntry={type === "password" && !showPassword}
+      className={`px-3 p-3 text-base rounded-full bg-gray ${
+        type === "password" ? "pr-10" : ""
+      } ${type === "password" ? "" : props.twClass || ""}`}
+      {...props}
+      {...field}
+      style={{ fontFamily, lineHeight: 18 }}
+    />
+  );
+
+  if (type === "bare") {
+    return renderTextInput({});
+  }
+
+  return (
+    <Controller
+      control={control}
+      name={name}
+      rules={rules}
+      render={({ field: { onChange, onBlur, value } }) => (
+        <View className={`relative ${props.twClass || ""}`}>
+          {renderTextInput({ value, onChangeText: onChange, onBlur })}
+          {type === "password" && (
+            <View className="absolute top-0 flex items-center justify-center h-12 right-3">
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                 {showPassword ? (
                   <EyeOff size={20} color="#8696BB" />
@@ -38,44 +57,9 @@ export default function Input({
                 )}
               </TouchableOpacity>
             </View>
-          </View>
-        )}
-        name={name}
-      />
-    );
-  }
-
-  if (type === "bare") {
-    return (
-      <TextInput
-        className={`p-3 text-base rounded-full bg-gray ${props.twClass}`}
-        {...props}
-      />
-    );
-  }
-
-  return (
-    <Controller
-      control={control}
-      render={({ field: { onChange, onBlur, value } }) => (
-        <TextInput
-          className={`p-3 text-base rounded-full bg-gray ${props.twClass}`}
-          {...props}
-          value={value}
-          onChangeText={onChange}
-          onBlur={onBlur}
-          style={{
-            fontFamily: light
-              ? "Ubuntu_300Light"
-              : medium
-              ? "Ubuntu_500Medium"
-              : bold
-              ? "Ubuntu_700Bold"
-              : "Ubuntu_400Regular",
-          }}
-        />
+          )}
+        </View>
       )}
-      name={name}
     />
   );
 }

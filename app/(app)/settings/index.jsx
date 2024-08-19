@@ -1,19 +1,53 @@
-import { router } from "expo-router";
+import { StackActions } from "@react-navigation/native";
+import { router, useNavigationContainerRef } from "expo-router";
 import { View } from "react-native";
 import Button from "../../../components/Button";
+import Pressable from "../../../components/Pressable";
 import Text from "../../../components/Text";
-import { ROUTE_SETTINGS } from "../../../constants/routes";
-import { useAuthContext } from "../../../providers/auth";
+import { ROUTE_LOGIN, ROUTE_SETTINGS } from "../../../constants/routes";
+import { FIELDS } from "../../../constants/user";
+import { useAuth } from "../../../providers/auth";
 
 export default function EditUser() {
-  const { logout } = useAuthContext();
+  const { logout } = useAuth();
+  const rootNavigation = useNavigationContainerRef();
+
+  const popNavigation = () => {
+    if (rootNavigation?.canGoBack()) {
+      rootNavigation.dispatch(StackActions.popToTop());
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+    } catch (error) {
+      console.log(error);
+    } finally {
+      popNavigation();
+      router.replace(ROUTE_LOGIN);
+    }
+  };
+
   return (
     <View className="flex-1 bg-white">
-      <View className="flex-1 px-6 pt-12">
-        <Text>Hello</Text>
-        <Text>Hello</Text>
-        <Text>Hello</Text>
-        <Text>Hello</Text>
+      <View className="flex-1 px-6">
+        {[
+          ...FIELDS,
+          {
+            displayName: "Email",
+            type: "text",
+          },
+        ].map((field, index) => {
+          return (
+            <View key={index}>
+              <Text twClass="text-base">{field.displayName}</Text>
+              <Pressable className="p-3 mt-2 mb-4 text-base rounded-full bg-gray">
+                <Text twClass="text-base">Change</Text>
+              </Pressable>
+            </View>
+          );
+        })}
       </View>
       <View className="px-6 pb-12">
         <Button
@@ -34,7 +68,7 @@ export default function EditUser() {
         >
           Change password
         </Button>
-        <Button onPress={logout} cooldown={1000} type="secondary">
+        <Button onPress={handleLogout} cooldown={1000} type="secondary">
           Logout
         </Button>
       </View>

@@ -1,10 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { ClockArrowDown, ClockArrowUp, Search } from "lucide-react-native";
-import { ScrollView, TextInput, View } from "react-native";
+import { ScrollView, View } from "react-native";
 import { callGetDocumentTypes } from "../api/document";
+import Input from "../components/Input";
 import Pressable from "../components/Pressable";
 import Text from "../components/Text";
 import Loader from "../components/loader";
+import Colors from "../constants/color";
 
 export default function FilterView({ filter, setFilter }) {
   const { data: documentTypes = {}, isFetched } = useQuery({
@@ -19,24 +21,25 @@ export default function FilterView({ filter, setFilter }) {
   return (
     <View className="px-6">
       <View className="flex flex-row mb-3">
-        <TextInput
+        <Input
+          type="bare"
           placeholder="Search"
-          className="flex-1 p-4 text-base bg-white rounded-full pl-14 text-tgray"
-          placeholderTextColor="#8696BB"
+          twClass="flex-1 rounded-full pl-12 text-tgray bg-gray"
+          placeholderTextColor={Colors.tgray}
           value={filter.searchQuery}
           onChangeText={(text) => setFilter({ ...filter, searchQuery: text })}
         />
         <View className="absolute left-4 top-4">
-          <Search size={24} color="#8696BB" />
+          <Search size={24} color={Colors.tgray} />
         </View>
         <Pressable
-          className="p-4 ml-2 bg-white rounded-full"
+          className="p-4 ml-2 rounded-full bg-gray"
           onPress={() => setFilter({ ...filter, sort: filter.sort * -1 })}
         >
           {filter.sort === 1 ? (
-            <ClockArrowDown size={24} color="#8696BB" />
+            <ClockArrowDown size={24} color={Colors.tgray} />
           ) : (
-            <ClockArrowUp size={24} color="#8696BB" />
+            <ClockArrowUp size={24} color={Colors.tgray} />
           )}
         </Pressable>
       </View>
@@ -52,8 +55,8 @@ export default function FilterView({ filter, setFilter }) {
           documentTypes?.items?.map((type, index) => (
             <Pressable
               key={`${type.name}-${index}`}
-              className={`px-4 py-3 mr-2 bg-white border-neutral ${
-                index === filter.type ? "bg-softPrimary10" : ""
+              className={`px-4 py-3 mr-2 bg-gray rounded-full ${
+                index === filter.type ? "bg-secondary10" : ""
               }`}
               onPress={() => {
                 if (index === filter.type) {
@@ -65,7 +68,7 @@ export default function FilterView({ filter, setFilter }) {
             >
               <Text
                 twClass={`text-tgray ${
-                  index === filter.type ? "text-softPrimary" : ""
+                  index === filter.type ? "text-secondary" : ""
                 }`}
               >
                 {type.name}

@@ -14,18 +14,18 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
     <View className="flex-row items-center justify-center w-screen h-20 p-5 bg-white">
       <Pressable
         className={`p-4 rounded-full flex-1 ${
-          state.index === 0 ? "bg-softPrimary10" : ""
+          state.index === 0 ? "bg-secondary10" : ""
         }`}
         onPress={() => router.push(ROUTE_HOME)}
       >
         <View className="flex-row items-center justify-center">
           <Plus
             size={24}
-            color={state.index === 0 ? Colors.softPrimary : Colors.text}
+            color={state.index === 0 ? Colors.secondary : Colors.text}
           />
           <Text
             twClass={`text-base ml-2 ${
-              state.index === 0 ? "text-softPrimary" : "text-text"
+              state.index === 0 ? "text-secondary" : "text-text"
             }`}
           >
             New document
@@ -34,18 +34,18 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
       </Pressable>
       <Pressable
         className={`p-4 rounded-full flex-1 ml-4 relative ${
-          state.index === 1 ? "bg-softPrimary10" : ""
+          state.index === 1 ? "bg-secondary10" : ""
         }`}
         onPress={() => router.push(ROUTE_LIST)}
       >
         <View className="flex-row items-center justify-center">
           <FileText
             size={24}
-            color={state.index === 1 ? Colors.softPrimary : Colors.text}
+            color={state.index === 1 ? Colors.secondary : Colors.text}
           />
           <Text
             twClass={`text-base ml-2 ${
-              state.index === 1 ? "text-softPrimary" : "text-text"
+              state.index === 1 ? "text-secondary" : "text-text"
             }`}
           >
             My documents
@@ -68,7 +68,7 @@ export default function RootLayout() {
       tabBar={(props) => <CustomTabBar {...props} />}
     >
       <Tabs.Screen name="index" />
-      <Tabs.Screen name="list" />
+      <Tabs.Screen name="list" options={{ headerStatusBarHeight: 0 }} />
     </Tabs>
   );
 }

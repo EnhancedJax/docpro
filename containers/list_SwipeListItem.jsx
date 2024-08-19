@@ -46,12 +46,12 @@ export default function SwipeListItem({ item }) {
           {item.status !== 2 && (
             <View
               className={`self-start flex-none mb-3 rounded-full ${
-                item.status === 0 ? "bg-softPrimary10" : "bg-payment10 "
+                item.status === 0 ? "bg-secondary10" : "bg-payment10 "
               }`}
             >
               <Text
                 twClass={`text-xs px-2 py-1 ${
-                  item.status === 0 ? "text-softPrimary" : "text-payment"
+                  item.status === 0 ? "text-secondary" : "text-payment"
                 }`}
               >
                 {item.status === 0 ? "Draft" : "Pending payment"}
@@ -72,7 +72,7 @@ export default function SwipeListItem({ item }) {
         {item.status !== 2 && (
           <View
             className={`p-3 mr-4 rounded-full ${
-              item.status === 0 ? "bg-softPrimary" : "bg-payment"
+              item.status === 0 ? "bg-secondary" : "bg-payment"
             }`}
           >
             {item.status === 0 ? (

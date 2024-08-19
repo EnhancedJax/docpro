@@ -11,7 +11,7 @@ export default function GradientMask({
     <MaskedView
       style={{ flex: 1 }}
       maskElement={
-        <View className="flex-1">
+        <View className="flex-1 ">
           <LinearGradient
             className="flex-1"
             angle={horizontal ? 0 : 270}

@@ -1,37 +1,21 @@
-import { router } from "expo-router";
-import React, { useState } from "react";
-import { useForm } from "react-hook-form";
+import React from "react";
 import { TouchableOpacity, View } from "react-native";
 import Button from "../components/Button";
+import FieldError from "../components/FieldError";
 import Input from "../components/Input";
 import Text from "../components/Text";
-import { ROUTE_SIGNUP } from "../constants/routes";
-import { useAuthContext } from "../providers/auth";
+import { useLogin, withLoginProvider } from "../providers/login";
 
-export default function Index() {
-  const [currentScreen, setCurrentScreen] = useState("login");
-  const { control, handleSubmit } = useForm({
-    defaultValues: {
-      email: "",
-      password: "",
-      confirmPassword: "",
-    },
-  });
-  const { login } = useAuthContext();
-
-  const onSignupPress = (data) => {
-    router.push({
-      pathname: ROUTE_SIGNUP,
-      params: {
-        email: data.email,
-        password: data.password,
-      },
-    });
-  };
-
-  const onLoginPress = (data) => {
-    login(data);
-  };
+function Login() {
+  const {
+    handleSignup,
+    handleLogin,
+    currentScreen,
+    setCurrentScreen,
+    control,
+    handleSubmit,
+    errors,
+  } = useLogin();
 
   return (
     <View className="flex flex-col flex-grow px-6 pb-12 bg-white">
@@ -49,56 +33,47 @@ export default function Index() {
             control={control}
             name="email"
             placeholder="Email"
-            twClass="mb-4"
             textContentType="oneTimeCode" // fix ios issue
           />
+          <FieldError error={errors.email} />
           <Input
             type="password"
             placeholder="Password"
             control={control}
             name="password"
-            twClass="mb-4"
+            twClass="mt-4"
           />
+          <FieldError error={errors.password} />
           {currentScreen === "signup" && (
-            <Input
-              type="password"
-              placeholder="Confirm Password"
-              control={control}
-              name="confirmPassword"
-            />
+            <>
+              <Input
+                type="password"
+                placeholder="Confirm Password"
+                control={control}
+                name="confirmPassword"
+                twClass="mt-4"
+              />
+              <FieldError error={errors.confirmPassword} />
+            </>
           )}
         </View>
       )}
       <View>
-        {currentScreen === "signup" && (
-          <Button
-            className="mb-2"
-            onPress={() => {
-              if (currentScreen === "signup") {
-                handleSubmit(onSignupPress)();
-              } else {
-                setCurrentScreen("signup");
-              }
-            }}
-            cooldown={200}
-          >
-            Sign up
-          </Button>
-        )}
-        {currentScreen === "login" && (
-          <Button
-            className="mb-2"
-            onPress={() => {
-              if (currentScreen === "login") {
-                handleSubmit(onLoginPress)();
-              } else {
-                setCurrentScreen("login");
-              }
-            }}
-          >
-            Login
-          </Button>
-        )}
+        <Button
+          className="mb-2"
+          onPress={() => {
+            if (currentScreen === "signup") {
+              handleSubmit(handleSignup)();
+            } else if (currentScreen === "login") {
+              handleSubmit(handleLogin)();
+            } else {
+              setCurrentScreen(currentScreen === "signup" ? "login" : "signup");
+            }
+          }}
+          cooldown={200}
+        >
+          {currentScreen === "signup" ? "Sign up" : "Login"}
+        </Button>
         {currentScreen !== null && (
           <View className="flex flex-row justify-center">
             <Text twClass="text-base">
@@ -115,7 +90,7 @@ export default function Index() {
                 }
               }}
             >
-              <Text twClass="ml-2 text-softPrimary text-base" medium>
+              <Text twClass="ml-2 text-secondary text-base" medium>
                 {currentScreen === "signup" ? "Login" : "Sign up"}
               </Text>
             </TouchableOpacity>
@@ -125,3 +100,5 @@ export default function Index() {
     </View>
   );
 }
+
+export default withLoginProvider(Login);

@@ -85,7 +85,7 @@ const FAB = ({ items = [] }) => {
             >
               <TouchableOpacity
                 onPress={() => item.onPress(index)}
-                className="items-center justify-center flex-initial px-4 py-4 mb-2 rounded-full bg-softPrimary"
+                className="items-center justify-center flex-initial px-4 py-4 mb-2 rounded-full bg-secondary"
               >
                 <Text twClass="text-white">{item.label}</Text>
               </TouchableOpacity>
