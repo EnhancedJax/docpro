@@ -27,7 +27,9 @@ function TemplateProvider({ children }) {
   const { showLoader, hideLoader } = useLoader();
   const [prematureHandledRemove, setPrematureHandledRemove] = useState(false);
   const [progress, setProgress] = useState(0);
-  const form = useForm({});
+  const form = useForm({
+    mode: "onChange",
+  });
   const { watch, getValues } = form;
   const rootNavigation = useNavigationContainerRef();
 

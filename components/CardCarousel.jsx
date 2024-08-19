@@ -72,6 +72,7 @@ export default function CardCarousel({
   setActiveIndex = () => {},
   children = null,
   goToIndex = null,
+  onFinishGo = () => {},
 }) {
   const ref = useRef(null);
   const scrollX = useSharedValue(0);
@@ -97,6 +98,7 @@ export default function CardCarousel({
             (React.Children.count(children) - goToIndex)) /
             4,
       });
+      onFinishGo();
     }
   }, [goToIndex]);
 

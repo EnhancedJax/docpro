@@ -19,7 +19,8 @@ function Template() {
   } = useTemplate();
   const {
     control,
-    formState: { errors },
+    handleSubmit,
+    formState: { errors, isValid },
   } = form;
 
   const isKeyboardOpen = useKeyboardOpen();
@@ -39,34 +40,44 @@ function Template() {
         </Button>
         <Button
           type={
-            progress === questionItem.length || progress > activeIndex
+            (progress === questionItem.length && isValid) ||
+            (progress > activeIndex && activeIndex < questionItem.length - 1)
               ? "primary"
               : "inactive"
           }
           onPress={
-            progress === questionItem.length
+            activeIndex === questionItem.length - 1 && isValid
               ? handleSaveAndPay
-              : progress > activeIndex
+              : progress > activeIndex && activeIndex < questionItem.length - 1
               ? () => {
                   setGoToIndex(activeIndex + 1);
                 }
-              : () => {
+              : activeIndex < questionItem.length - 1
+              ? () => {
                   showToast({
-                    message: "You must answer all questions.",
+                    message: "Please answer this question first.",
                     type: "info",
                   });
+                }
+              : () => {
+                  showToast({
+                    message: "Please answer all questions.",
+                    type: "info",
+                  });
+                  setGoToIndex(parseInt(Object.keys(errors)[0]));
                 }
           }
           allowAction
           className="flex-1 ml-2"
         >
-          {progress === questionItem.length ? "Finish" : "Next"}
+          {activeIndex === questionItem.length - 1 ? "Finish" : "Next"}
         </Button>
       </View>
       <CardCarousel
         activeIndex={activeIndex}
         setActiveIndex={setActiveIndex}
         goToIndex={goToIndex}
+        onFinishGo={() => setGoToIndex(null)}
       >
         {questionItem
           .filter((_, index) => index <= progress)
