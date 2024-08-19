@@ -22,7 +22,7 @@ function Edit() {
     <View className="flex-1">
       {!isPassword ? (
         <QuestionCard
-          className="h-auto"
+          className="justify-center"
           question={FIELDS[index] || EMAIL_FIELD}
           index={0}
           control={control}
@@ -37,7 +37,7 @@ function Edit() {
           </Button>
         </QuestionCard>
       ) : (
-        <View className="p-6">
+        <View className="flex flex-col justify-center flex-1 p-6">
           <Text bold twClass="mb-2 text-xl">
             Edit Password
           </Text>
