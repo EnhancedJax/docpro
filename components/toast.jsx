@@ -60,7 +60,7 @@ const Toast = ({ visible, message, type }) => {
       case "success":
         return <CheckCircle size={24} color={Colors.success} />;
       case "error":
-        return <XCircle size={24} color={Colors.error} />;
+        return <XCircle size={24} color={Colors.danger} />;
       default:
         return <Info size={24} color={Colors.primary} />;
     }

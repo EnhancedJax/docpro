@@ -64,10 +64,18 @@ export const callGetMe = async () => {
   throw new Error("An error has occurred");
 };
 
-export const callUpdateUser = async () => {
+export const callUpdateMe = async () => {
   // Simulating API call with a timeout
   await new Promise((resolve) => setTimeout(resolve, 100));
 
   // Dummy response
   return true;
+};
+
+export const callUpdatePassword = async () => {
+  // Simulating API call with a timeout
+  await new Promise((resolve) => setTimeout(resolve, 100));
+
+  // Dummy response
+  throw new Error("Password does not match");
 };

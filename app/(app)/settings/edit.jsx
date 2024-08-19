@@ -1,70 +1,22 @@
-import { yupResolver } from "@hookform/resolvers/yup";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
-import { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
 import { View } from "react-native";
 import Button from "../../../components/Button";
 import FieldError from "../../../components/FieldError";
 import Input from "../../../components/Input";
 import QuestionCard from "../../../components/QuestionCard";
 import Text from "../../../components/Text";
-import { useToast } from "../../../components/toast";
 import { EMAIL_FIELD, FIELDS } from "../../../constants/user";
-import {
-  emailSchema,
-  passwordSchema,
-  requiredSchema,
-} from "../../../schema/edit";
+import { useEdit, withEditProvider } from "../../../providers/edit";
 
-export default function EditProp() {
-  const { index, value, isPassword: isPasswordString } = useLocalSearchParams();
-  const [saved, setSaved] = useState(false);
-  const isPassword = isPasswordString === "true";
+function Edit() {
   const {
     control,
-    formState: { errors },
+    errors,
     handleSubmit,
-  } = useForm({
-    resolver: yupResolver(
-      isPassword
-        ? passwordSchema
-        : index < 0
-        ? emailSchema(value)
-        : requiredSchema
-    ),
-    defaultValues: {
-      0: value,
-    },
-  });
-  const navigation = useNavigation();
-  const { showToast } = useToast();
-  const onSubmit = (data) => {
-    try {
-      console.log(data);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      setSaved(true);
-      showToast({
-        message: "Changes saved",
-        type: "success",
-      });
-      router.back();
-    }
-  };
-
-  useEffect(() => {
-    const unsubscribe = navigation.addListener("beforeRemove", (e) => {
-      if (!saved) {
-        showToast({
-          message: "Changes discarded",
-          type: "info",
-        });
-      }
-    });
-
-    return unsubscribe;
-  }, [navigation, saved]);
+    onSubmit,
+    onPasswordSubmit,
+    isPassword,
+    index,
+  } = useEdit();
 
   return (
     <View className="flex-1">
@@ -115,7 +67,7 @@ export default function EditProp() {
             <FieldError error={errors.confirmPassword} />
             <Button
               className="mt-4"
-              onPress={handleSubmit(onSubmit)}
+              onPress={handleSubmit(onPasswordSubmit)}
               cooldown={1000}
             >
               Save
@@ -126,3 +78,5 @@ export default function EditProp() {
     </View>
   );
 }
+
+export default withEditProvider(Edit);

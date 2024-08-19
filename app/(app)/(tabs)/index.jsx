@@ -31,6 +31,7 @@ export default function New() {
         <Pressable
           className="p-4 rounded-full"
           onPress={() => router.push(ROUTE_SETTINGS)}
+          cooldown={1000}
         >
           <Cog size={24} color={Colors.text} />
         </Pressable>
