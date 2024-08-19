@@ -40,7 +40,11 @@ export default function QuestionCard({
             render={({ field: { onChange, value } }) => (
               <DateTimePicker
                 value={
-                  value instanceof Date ? value : new Date(value) || new Date()
+                  value instanceof Date
+                    ? value
+                    : value !== undefined
+                    ? new Date(value)
+                    : new Date()
                 }
                 mode="date"
                 display="spinner"

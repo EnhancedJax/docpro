@@ -16,7 +16,7 @@ export default function Index() {
   useEffect(() => {
     const init = async () => {
       try {
-        const { data: meData } = await queryClient.fetchQuery({
+        const meData = await queryClient.fetchQuery({
           queryKey: ["me"],
           queryFn: callGetMe,
         });
@@ -32,7 +32,6 @@ export default function Index() {
       }
     };
 
-    console.log(accessToken);
     if (accessToken === 0) return;
     if (accessToken) {
       init();
@@ -49,7 +48,7 @@ export default function Index() {
     return <Redirect href={ROUTE_LOGIN} />;
   }
 
-  if (!authState.hasDocuments) {
+  if (authState.hasDocuments) {
     return <Redirect href={ROUTE_LIST} />;
   }
 

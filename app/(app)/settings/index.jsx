@@ -8,6 +8,7 @@ import Button from "../../../components/Button";
 import Loader from "../../../components/loader";
 import Pressable from "../../../components/Pressable";
 import Text from "../../../components/Text";
+import { useToast } from "../../../components/toast";
 import Colors from "../../../constants/color";
 import { ROUTE_LOGIN, ROUTE_SETTINGS_EDIT } from "../../../constants/routes";
 import { EMAIL_FIELD, FIELDS } from "../../../constants/user";
@@ -15,6 +16,7 @@ import { useAuth } from "../../../providers/auth";
 
 export default function EditUser() {
   const { logout } = useAuth();
+  const { showToast } = useToast();
   const rootNavigation = useNavigationContainerRef();
   const { data = {}, isFetched } = useQuery({
     queryKey: ["me"],
@@ -28,14 +30,13 @@ export default function EditUser() {
   };
 
   const handleLogout = async () => {
-    try {
-      await logout();
-    } catch (error) {
-      console.log(error);
-    } finally {
-      popNavigation();
-      router.replace(ROUTE_LOGIN);
-    }
+    await logout();
+    showToast({
+      message: "Logout successful!",
+      type: "success",
+    });
+    popNavigation();
+    router.replace(ROUTE_LOGIN);
   };
 
   if (!isFetched) return <Loader visible />;

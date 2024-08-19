@@ -89,8 +89,14 @@ export default function CardCarousel({
   });
 
   useEffect(() => {
-    if (goToIndex) {
-      ref.current.scrollTo({ x: goToIndex * CARD_WIDTH });
+    if (goToIndex !== null) {
+      ref.current.scrollTo({
+        x:
+          goToIndex * CARD_WIDTH -
+          (SPACING_FOR_CARD_INSET *
+            (React.Children.count(children) - goToIndex)) /
+            4,
+      });
     }
   }, [goToIndex]);
 
@@ -102,6 +108,7 @@ export default function CardCarousel({
         showsHorizontalScrollIndicator={false}
         pagingEnabled
         decelerationRate={0}
+        disableIntervalMomentum
         snapToInterval={CARD_WIDTH + 10}
         contentOffset={{ x: -SPACING_FOR_CARD_INSET }}
         snapToAlignment="center"

@@ -27,6 +27,7 @@ export const callSignupUser = async (data) => {
   // Dummy response
   const response = {
     accessToken: "ABC",
+    refreshToken: "DEF",
   };
 
   if (response.accessToken) {

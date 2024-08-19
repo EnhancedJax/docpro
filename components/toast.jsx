@@ -1,14 +1,18 @@
 import { CheckCircle, Info, XCircle } from "lucide-react-native";
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { View } from "react-native";
 import Animated, {
   Easing,
   useAnimatedStyle,
+  useSharedValue,
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Colors from "../constants/color";
+import Pressable from "./Pressable";
 import Text from "./Text";
+
+const DURATION = 3000;
 
 const ToastContext = createContext();
 
@@ -25,19 +29,25 @@ export const ToastProvider = ({ children }) => {
     setToast({ visible: true, message, type });
     setTimeout(() => {
       setToast((prev) => ({ ...prev, visible: false }));
-    }, 3000);
+    }, DURATION);
+  };
+
+  const hideToast = () => {
+    setToast((prev) => ({ ...prev, visible: false }));
   };
 
   return (
-    <ToastContext.Provider value={{ showToast }}>
+    <ToastContext.Provider value={{ showToast, hideToast }}>
       {children}
-      <Toast {...toast} />
+      <Toast {...toast} onPress={hideToast} />
     </ToastContext.Provider>
   );
 };
 
-const Toast = ({ visible, message, type }) => {
+const Toast = ({ visible, message, type, onPress }) => {
   const insets = useSafeAreaInsets();
+  const progress = useSharedValue(0);
+
   const animatedStyle = useAnimatedStyle(() => {
     return {
       opacity: withTiming(visible ? 1 : 0, {
@@ -54,6 +64,23 @@ const Toast = ({ visible, message, type }) => {
       ],
     };
   });
+
+  const progressStyle = useAnimatedStyle(() => {
+    return {
+      width: `${progress.value * 100}%`,
+    };
+  });
+
+  useEffect(() => {
+    if (visible) {
+      progress.value = withTiming(1, {
+        duration: DURATION,
+        easing: Easing.linear,
+      });
+    } else {
+      progress.value = 0;
+    }
+  }, [visible]);
 
   const getIcon = () => {
     switch (type) {
@@ -74,10 +101,20 @@ const Toast = ({ visible, message, type }) => {
           top: insets.top + 12,
         },
       ]}
-      className="absolute flex-row items-center p-4 bg-white rounded-lg shadow-lg left-4 right-4"
+      className="absolute left-4 right-4 "
     >
-      <View className="mr-3">{getIcon()}</View>
-      <Text className="flex-1 text-gray-800">{message}</Text>
+      <Pressable className="shadow-lg " onPress={onPress}>
+        <View className="relative bg-white rounded-lg">
+          <View className="flex-row items-center p-4">
+            <View className="mr-3">{getIcon()}</View>
+            <Text className="text-gray-800">{message}</Text>
+          </View>
+          <Animated.View
+            style={progressStyle}
+            className="absolute bottom-0 h-1 rounded-b-lg bg-primary"
+          />
+        </View>
+      </Pressable>
     </Animated.View>
   );
 };

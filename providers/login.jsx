@@ -1,8 +1,8 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { StackActions } from "@react-navigation/native";
-import { router, useNavigationContainerRef } from "expo-router";
+import { router } from "expo-router";
 import { createContext, useContext, useState } from "react";
 import { useForm } from "react-hook-form";
+import { useToast } from "../components/toast";
 import { ROUTE_ENTRY, ROUTE_SIGNUP } from "../constants/routes";
 import { useAuth } from "../providers/auth";
 import { schema } from "../schema/login";
@@ -12,6 +12,7 @@ export const useLogin = () => useContext(LoginContext);
 
 function LoginProvider({ children }) {
   const [currentScreen, setCurrentScreen] = useState("login");
+  const { showToast } = useToast();
   const {
     control,
     handleSubmit,
@@ -25,14 +26,6 @@ function LoginProvider({ children }) {
     resolver: yupResolver(schema(currentScreen === "signup")),
   });
   const { login } = useAuth();
-  const rootNavigation = useNavigationContainerRef();
-
-  const popNavigation = () => {
-    console.log(rootNavigation.canGoBack());
-    if (rootNavigation?.canGoBack()) {
-      rootNavigation.dispatch(StackActions.popToTop());
-    }
-  };
 
   const handleSignup = (data) => {
     router.push({
@@ -45,13 +38,12 @@ function LoginProvider({ children }) {
   };
 
   const handleLogin = async (data) => {
-    try {
-      await login(data);
-    } catch (error) {
-      console.log(error);
-    } finally {
-      router.replace(ROUTE_ENTRY);
-    }
+    await login(data);
+    showToast({
+      message: "Login successful!",
+      type: "success",
+    });
+    router.replace(ROUTE_ENTRY);
   };
 
   return (
