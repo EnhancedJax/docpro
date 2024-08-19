@@ -7,7 +7,7 @@ import Pressable from "../components/Pressable";
 import Text from "../components/Text";
 import { useToast } from "../components/toast";
 import Colors from "../constants/color";
-import { ROUTE_TEMPLATE } from "../constants/routes";
+import { ROUTE_TEMPLATE, ROUTE_VIEW } from "../constants/routes";
 
 export default function SwipeListItem({ item }) {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
@@ -19,9 +19,7 @@ export default function SwipeListItem({ item }) {
       onPress={async () => {
         switch (item.status) {
           case 0:
-            router.push(ROUTE_TEMPLATE(item.id));
-            break;
-          case 2:
+            router.push({ pathname: ROUTE_TEMPLATE, params: { id: item.id } });
             break;
           case 1:
             try {
@@ -37,6 +35,12 @@ export default function SwipeListItem({ item }) {
               showToast(error.message);
             } finally {
             }
+            break;
+          case 2:
+            router.push({
+              pathname: ROUTE_VIEW,
+              params: { id: item.id, title: item.title },
+            });
             break;
         }
       }}

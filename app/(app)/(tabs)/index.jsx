@@ -46,8 +46,8 @@ export default function New() {
                     onPress={() => {
                       const id = index;
                       router.push({
-                        pathname: ROUTE_TEMPLATE(id),
-                        params: { name: `New ${type.name}` },
+                        pathname: ROUTE_TEMPLATE,
+                        params: { id, name: `New ${type.name}` },
                       });
                     }}
                     cooldown={1000}
