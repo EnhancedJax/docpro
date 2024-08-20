@@ -8,11 +8,10 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { DEFAULT_TOAST_DURATION } from "../constants";
 import Colors from "../constants/color";
 import Pressable from "./Pressable";
 import Text from "./Text";
-
-const DURATION = 3000;
 
 const ToastContext = createContext();
 
@@ -29,7 +28,7 @@ export const ToastProvider = ({ children }) => {
     setToast({ visible: true, message, type });
     setTimeout(() => {
       setToast((prev) => ({ ...prev, visible: false }));
-    }, DURATION);
+    }, DEFAULT_TOAST_DURATION);
   };
 
   const hideToast = () => {
@@ -74,7 +73,7 @@ const Toast = ({ visible, message, type, onPress }) => {
   useEffect(() => {
     if (visible) {
       progress.value = withTiming(1, {
-        duration: DURATION,
+        duration: DEFAULT_TOAST_DURATION,
         easing: Easing.linear,
       });
     } else {
@@ -111,7 +110,7 @@ const Toast = ({ visible, message, type, onPress }) => {
           </View>
           <Animated.View
             style={progressStyle}
-            className="absolute bottom-0 h-1 rounded-b-lg bg-primary"
+            className="absolute bottom-0 h-[2px] rounded-b-lg bg-primary"
           />
         </View>
       </Pressable>

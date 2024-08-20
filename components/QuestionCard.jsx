@@ -60,7 +60,9 @@ export default function QuestionCard({
                   <Pressable onPress={() => setShowDatePicker(true)}>
                     <View className="flex-row items-center justify-center py-4 rounded-full bg-gray">
                       <Text medium twClass="text-lg">
-                        {value ? value.toDateString() : "Select Date"}
+                        {value && value instanceof Date
+                          ? value.toDateString()
+                          : "Select Date"}
                       </Text>
                     </View>
                   </Pressable>

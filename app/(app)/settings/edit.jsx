@@ -1,3 +1,4 @@
+import { router } from "expo-router";
 import { View } from "react-native";
 import Button from "../../../components/Button";
 import FieldError from "../../../components/FieldError";
@@ -29,11 +30,19 @@ function Edit() {
           errors={errors}
         >
           <Button
-            className="mt-4"
+            className="mt-8"
             onPress={handleSubmit(onSubmit)}
             cooldown={1000}
           >
             Save
+          </Button>
+          <Button
+            className="mt-2"
+            onPress={() => router.back()}
+            cooldown={1000}
+            type="secondary"
+          >
+            Cancel
           </Button>
         </QuestionCard>
       ) : (
