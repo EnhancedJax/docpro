@@ -1,3 +1,4 @@
+import { yupResolver } from "@hookform/resolvers/yup";
 import { StackActions } from "@react-navigation/native";
 import {
   router,
@@ -13,6 +14,7 @@ import React, {
   useState,
 } from "react";
 import { useForm } from "react-hook-form";
+import * as yup from "yup";
 import { useLoader } from "../components/loader";
 import { useToast } from "../components/toast";
 import { ROUTE_LIST } from "../constants/routes";
@@ -27,8 +29,10 @@ function TemplateProvider({ children }) {
   const { showLoader, hideLoader } = useLoader();
   const [prematureHandledRemove, setPrematureHandledRemove] = useState(false);
   const [progress, setProgress] = useState(0);
+  const [schema, setSchema] = useState(yup.object());
   const form = useForm({
     mode: "onChange",
+    resolver: yupResolver(schema),
   });
   const { watch, getValues } = form;
   const rootNavigation = useNavigationContainerRef();
@@ -45,12 +49,16 @@ function TemplateProvider({ children }) {
         question: "Give your document a name",
         type: "text",
         placeholder: defaultName,
+        min: 1,
+        max: 10,
       },
       {
         question: "Please select types of documents you have",
         description: "This is a description",
         type: "checkbox",
         options: ["A", "B", "C"],
+        min: 1,
+        max: 3,
       },
       {
         question: "Are you a permanent resident of Hong Kong?",
@@ -62,21 +70,81 @@ function TemplateProvider({ children }) {
         question: "When did your term start?",
         description: "This is a description",
         type: "date",
+        min: new Date(new Date().setMonth(new Date().getMonth() - 1)),
+        max: new Date(new Date().setMonth(new Date().getMonth() + 1)),
       },
       {
         question: "What is your permanent address?",
         description: "This is a description",
-        type: "text",
+        type: "textarea",
         placeholder: "Enter your address",
+        min: 1,
+        max: 40,
       },
       {
         question: "What is your monthly income?",
         description: "This is a description",
         type: "number",
         placeholder: "Enter your monthly income",
+        min: 1,
+        max: 1000000,
       },
     ];
   }, [defaultName]);
+
+  useEffect(() => {
+    const generatedSchema = yup.object().shape(
+      questionItem.reduce((acc, question, index) => {
+        switch (question.type) {
+          case "text":
+          case "textarea":
+            acc[index] = yup
+              .string()
+              .min(question.min, `Minimum ${question.min} characters`)
+              .max(question.max, `Maximum ${question.max} characters`)
+              .required("This field is required");
+            break;
+          case "checkbox":
+            acc[index] = yup
+              .array()
+              .of(yup.string())
+              .min(question.min, `Select at least ${question.min} option(s)`)
+              .max(question.max, `Select at most ${question.max} option(s)`)
+              .required("This field is required");
+            break;
+          case "radio":
+            acc[index] = yup
+              .string()
+              .oneOf(question.options, "Invalid option")
+              .required("This field is required");
+            break;
+          case "date":
+            acc[index] = yup
+              .date()
+              .min(
+                question.min,
+                `Date must be after ${question.min.toDateString()}`
+              )
+              .max(
+                question.max,
+                `Date must be before ${question.max.toDateString()}`
+              )
+              .required("This field is required");
+            break;
+          case "number":
+            acc[index] = yup
+              .number()
+              .typeError("Please enter a number")
+              .min(question.min, `Minimum value is ${question.min}`)
+              .max(question.max, `Maximum value is ${question.max}`)
+              .required("This field is required");
+            break;
+        }
+        return acc;
+      }, {})
+    );
+    setSchema(generatedSchema);
+  }, [questionItem]);
 
   useEffect(() => {
     const subscription = watch((value, { name, type }) => {

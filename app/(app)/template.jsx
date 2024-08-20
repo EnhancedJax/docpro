@@ -64,7 +64,9 @@ function Template() {
                     message: "Please answer all questions.",
                     type: "info",
                   });
-                  setGoToIndex(parseInt(Object.keys(errors)[0]));
+                  if (Object.keys(errors).length > 0) {
+                    setGoToIndex(parseInt(Object.keys(errors)[0]));
+                  }
                 }
           }
           allowAction
@@ -88,6 +90,7 @@ function Template() {
               question={question}
               control={control}
               errors={errors}
+              useRequiredValidator={false}
             />
           ))}
       </CardCarousel>

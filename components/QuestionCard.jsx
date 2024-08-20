@@ -1,5 +1,5 @@
 import DateTimePicker from "@react-native-community/datetimepicker";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Controller } from "react-hook-form";
 import { Platform, View } from "react-native";
 import Checkbox from "../components/Checkbox";
@@ -14,31 +14,38 @@ export default function QuestionCard({
   control,
   errors,
   children,
+  useRequiredValidator = true,
   ...props
 }) {
   const [showDatePicker, setShowDatePicker] = useState(false);
+  const indexAsName = useMemo(() => index.toString(), [index]);
+  const requiredValidator = useMemo(
+    () => (useRequiredValidator ? { required: true } : {}),
+    [useRequiredValidator]
+  );
+
   const renderInput = () => {
     switch (question.type) {
       case "text":
+      case "textarea":
       case "number":
         return (
-          <>
-            <Input
-              control={control}
-              name={index.toString()}
-              rules={{ required: true }}
-              label={question.question}
-              placeholder={question.placeholder}
-              value={question.value}
-              keyboardType={question.type === "number" ? "numeric" : "default"}
-            />
-          </>
+          <Input
+            control={control}
+            name={indexAsName}
+            rules={requiredValidator}
+            label={question.question}
+            placeholder={question.placeholder}
+            value={question.value}
+            textarea={question.type === "textarea"}
+            keyboardType={question.type === "number" ? "numeric" : "default"}
+          />
         );
       case "date":
         return (
           <Controller
             control={control}
-            rules={{ required: true }}
+            rules={requiredValidator}
             render={({ field: { onChange, value } }) => (
               <View>
                 {Platform.OS === "ios" ? (
@@ -88,14 +95,14 @@ export default function QuestionCard({
                 )}
               </View>
             )}
-            name={index.toString()}
+            name={indexAsName}
           />
         );
       case "radio":
         return (
           <Controller
             control={control}
-            rules={{ required: true }}
+            rules={requiredValidator}
             render={({ field: { onChange, value } }) => (
               <RadioButtonGroup
                 onValueChange={onChange}
@@ -103,14 +110,14 @@ export default function QuestionCard({
                 options={question.options}
               ></RadioButtonGroup>
             )}
-            name={index.toString()}
+            name={indexAsName}
           />
         );
       case "checkbox":
         return (
           <Controller
             control={control}
-            rules={{ required: true }}
+            rules={requiredValidator}
             render={({ field: { onChange, value } }) => (
               <View>
                 {question.options.map((option) => (
@@ -131,7 +138,7 @@ export default function QuestionCard({
                 ))}
               </View>
             )}
-            name={index.toString()}
+            name={indexAsName}
           />
         );
       default:
@@ -148,9 +155,9 @@ export default function QuestionCard({
         <Text twClass="mb-8 text-base">{question.description}</Text>
       )}
       {renderInput()}
-      {errors[index.toString()] && (
+      {errors[indexAsName] && (
         <Text twClass="mt-2 text-red-500">
-          {errors[index.toString()].message || "This field is required."}
+          {errors[indexAsName].message || "This field is required."}
         </Text>
       )}
       {children}

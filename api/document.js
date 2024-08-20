@@ -24,8 +24,8 @@ export const callGetDocumentTypes = async () => {
     ],
   };
 
-  return response;
   if (response) {
+    return response;
   } else {
     throw new Error("Request failed");
   }

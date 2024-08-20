@@ -2,7 +2,7 @@ import { StripeProvider } from "@stripe/stripe-react-native";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import { Check, NotepadTextDashed, Squirrel } from "lucide-react-native";
-import { useEffect, useState } from "react";
+import { forwardRef, useEffect, useState } from "react";
 import { Alert, Platform, View } from "react-native";
 import { SwipeListView } from "react-native-swipe-list-view";
 import { callGetMe } from "../../../api/user";
@@ -32,6 +32,36 @@ export default function List() {
       console.log("Finished", finished, finishedId);
     }
   }, []);
+
+  const RenderHiddenItem = forwardRef(({ item, tab }, ref) => {
+    if (tab === "finished") {
+      return null;
+    }
+    return (
+      <Pressable
+        ref={ref}
+        className={`items-end justify-center flex-1 pr-4 mb-4 ml-10 bg-danger ${
+          Platform.OS === "ios" ? "rounded-xl" : "rounded-3xl"
+        }`}
+        onPress={() => {
+          console.log("Deleting item", item.id);
+          Alert.alert(
+            "Delete",
+            "Are you sure you want to delete this draft? ",
+            [
+              { text: "Cancel", style: "cancel" },
+              {
+                text: "Delete",
+                onPress: () => console.log("Deleted"),
+              },
+            ]
+          );
+        }}
+      >
+        <Text twClass="text-white">Delete</Text>
+      </Pressable>
+    );
+  });
 
   if (!isFetched) {
     return <Loader />;
@@ -122,33 +152,9 @@ export default function List() {
                 </View>
               }
               renderItem={({ item }) => <SwipeListItem item={item} />}
-              renderHiddenItem={
-                tab === "drafts"
-                  ? ({ item }) => (
-                      <Pressable
-                        className={`items-end justify-center flex-1 pr-4 mb-4 ml-10 bg-danger ${
-                          Platform.OS === "ios" ? "rounded-xl" : "rounded-3xl"
-                        }`}
-                        onPress={() => {
-                          console.log("Deleting item", item.id);
-                          Alert.alert(
-                            "Delete",
-                            "Are you sure you want to delete this draft? ",
-                            [
-                              { text: "Cancel", style: "cancel" },
-                              {
-                                text: "Delete",
-                                onPress: () => console.log("Deleted"),
-                              },
-                            ]
-                          );
-                        }}
-                      >
-                        <Text twClass="text-white">Delete</Text>
-                      </Pressable>
-                    )
-                  : null
-              }
+              renderHiddenItem={({ item }) => (
+                <RenderHiddenItem item={item} tab={tab} />
+              )}
               rightOpenValue={-75}
               disableRightSwipe
               keyExtractor={(item) => item.id}

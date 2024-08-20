@@ -2,6 +2,7 @@ import { Eye, EyeOff } from "lucide-react-native";
 import React, { useState } from "react";
 import { Controller } from "react-hook-form";
 import { TextInput, TouchableOpacity, View } from "react-native";
+import Pressable from "./Pressable";
 
 export default function Input({
   type = "text",
@@ -11,6 +12,7 @@ export default function Input({
   light = false,
   medium = false,
   bold = false,
+  textarea = false,
   ...props
 }) {
   const [showPassword, setShowPassword] = useState(false);
@@ -33,12 +35,21 @@ export default function Input({
     <TextInput
       onLayout={onLayout}
       secureTextEntry={type === "password" && !showPassword}
-      className={`px-3 p-4 text-base rounded-full bg-gray ${
+      className={`px-3 p-4 text-base bg-gray ${
         type === "password" ? "pr-10" : ""
-      } ${type === "password" ? "" : props.twClass || ""}`}
+      } ${type === "password" ? "" : props.twClass || ""} ${
+        textarea ? "rounded-3xl" : "rounded-full"
+      }`}
+      multiline={textarea}
+      number
+      style={{
+        minHeight: textarea ? 120 : null,
+        maxHeight: textarea ? 120 : null,
+        fontFamily,
+        lineHeight: 18,
+      }}
       {...props}
       {...field}
-      style={{ fontFamily, lineHeight: 18 }}
     />
   );
 
@@ -55,8 +66,8 @@ export default function Input({
         <View className={`relative ${props.twClass || ""}`}>
           {renderTextInput({ value, onChangeText: onChange, onBlur })}
           {type === "password" && (
-            <View
-              className="absolute top-0 flex items-center justify-center right-4"
+            <Pressable
+              className="absolute top-0 right-0 flex items-center justify-center px-4 "
               style={{ height }}
             >
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
@@ -66,7 +77,7 @@ export default function Input({
                   <Eye size={20} color="#8696BB" />
                 )}
               </TouchableOpacity>
-            </View>
+            </Pressable>
           )}
         </View>
       )}

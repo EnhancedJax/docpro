@@ -91,11 +91,7 @@ export default function CardCarousel({
   useEffect(() => {
     if (goToIndex !== null) {
       ref.current.scrollTo({
-        x:
-          goToIndex * CARD_WIDTH -
-          (SPACING_FOR_CARD_INSET *
-            (React.Children.count(children) - goToIndex)) /
-            4,
+        x: goToIndex * (CARD_WIDTH + MARGIN_FOR_CARD),
       });
       onFinishGo();
     }
