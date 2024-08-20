@@ -102,14 +102,7 @@ export default function CardCarousel({
   }, [goToIndex]);
 
   return (
-    <View
-      className="flex-row items-center justify-center flex-1 "
-      style={{
-        paddingLeft: SPACING_FOR_CARD_INSET,
-        paddingRight: SPACING_FOR_CARD_INSET,
-        overflow: "visible",
-      }}
-    >
+    <View className="flex-row items-center justify-center flex-1 ">
       <Animated.ScrollView
         ref={ref}
         horizontal
@@ -118,8 +111,9 @@ export default function CardCarousel({
         disableIntervalMomentum
         snapToInterval={CARD_WIDTH + MARGIN_FOR_CARD}
         className="h-full py-5 "
-        style={{
-          overflow: "visible",
+        contentContainerStyle={{
+          paddingLeft: SPACING_FOR_CARD_INSET,
+          paddingRight: SPACING_FOR_CARD_INSET,
         }}
         onScroll={scrollHandler}
         scrollEventThrottle={16}

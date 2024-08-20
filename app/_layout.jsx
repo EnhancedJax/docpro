@@ -14,7 +14,9 @@ import * as SplashScreen from "expo-splash-screen";
 import {
   Keyboard,
   KeyboardAvoidingView,
+  Platform,
   SafeAreaView,
+  StatusBar,
   TouchableWithoutFeedback,
 } from "react-native";
 import { LoaderProvider } from "../components/loader";
@@ -47,7 +49,13 @@ export default function RootLayout() {
       <LoaderProvider>
         <QueryClientProvider>
           <AuthProvider>
-            <SafeAreaView className="h-full bg-white">
+            <SafeAreaView
+              className="h-full bg-white"
+              style={{
+                paddingTop:
+                  Platform.OS === "android" ? StatusBar.currentHeight + 12 : 0,
+              }}
+            >
               <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
                   <Stack screenOptions={{ headerShown: false }}>

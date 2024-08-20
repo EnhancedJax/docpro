@@ -1,11 +1,12 @@
 import DateTimePicker from "@react-native-community/datetimepicker";
-import React from "react";
+import React, { useState } from "react";
 import { Controller } from "react-hook-form";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import Checkbox from "../components/Checkbox";
 import Input from "../components/Input";
 import { RadioButtonGroup } from "../components/RadioButton";
 import Text from "../components/Text";
+import Pressable from "./Pressable";
 
 export default function QuestionCard({
   question,
@@ -15,6 +16,7 @@ export default function QuestionCard({
   children,
   ...props
 }) {
+  const [showDatePicker, setShowDatePicker] = useState(false);
   const renderInput = () => {
     switch (question.type) {
       case "text":
@@ -38,20 +40,51 @@ export default function QuestionCard({
             control={control}
             rules={{ required: true }}
             render={({ field: { onChange, value } }) => (
-              <DateTimePicker
-                value={
-                  value instanceof Date
-                    ? value
-                    : value !== undefined
-                    ? new Date(value)
-                    : new Date()
-                }
-                mode="date"
-                // display="spinner"
-                onChange={(event, selectedDate) => {
-                  onChange(selectedDate);
-                }}
-              />
+              <View>
+                {Platform.OS === "ios" ? (
+                  <DateTimePicker
+                    value={
+                      value instanceof Date
+                        ? value
+                        : value !== undefined
+                        ? new Date(value)
+                        : new Date()
+                    }
+                    mode="date"
+                    display="spinner"
+                    onChange={(event, selectedDate) => {
+                      onChange(selectedDate);
+                    }}
+                  />
+                ) : (
+                  <Pressable onPress={() => setShowDatePicker(true)}>
+                    <View className="flex-row items-center justify-center py-4 rounded-full bg-gray">
+                      <Text medium twClass="text-lg">
+                        {value ? value.toDateString() : "Select Date"}
+                      </Text>
+                    </View>
+                  </Pressable>
+                )}
+                {Platform.OS !== "ios" && showDatePicker && (
+                  <DateTimePicker
+                    value={
+                      value instanceof Date
+                        ? value
+                        : value !== undefined
+                        ? new Date(value)
+                        : new Date()
+                    }
+                    mode="date"
+                    display="default"
+                    onChange={(event, selectedDate) => {
+                      setShowDatePicker(false);
+                      if (selectedDate) {
+                        onChange(selectedDate);
+                      }
+                    }}
+                  />
+                )}
+              </View>
             )}
             name={index.toString()}
           />

@@ -80,7 +80,7 @@ function Template() {
         onFinishGo={() => setGoToIndex(null)}
       >
         {questionItem
-          // .filter((_, index) => index <= progress)
+          .filter((_, index) => index <= progress)
           .map((question, index) => (
             <QuestionCard
               key={`Question${index}`}
