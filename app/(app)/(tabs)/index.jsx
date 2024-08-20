@@ -1,8 +1,11 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { ArrowRight, Cog } from "lucide-react-native";
 import { ScrollView, View } from "react-native";
-import { callGetDocumentTypes } from "../../../api/document";
+import {
+  callCreateDocument,
+  callGetDocumentTypes,
+} from "../../../api/document";
 import GradientMask from "../../../components/GradientMask";
 import Loader from "../../../components/loader";
 import Pressable from "../../../components/Pressable";
@@ -11,6 +14,7 @@ import Colors from "../../../constants/color";
 import { ROUTE_SETTINGS, ROUTE_TEMPLATE } from "../../../constants/routes";
 
 export default function New() {
+  const queryClient = useQueryClient();
   const { data: documentTypes = {}, isFetched } = useQuery({
     queryKey: ["documentTypes"],
     queryFn: callGetDocumentTypes,
@@ -44,12 +48,19 @@ export default function New() {
                 documentTypes?.items.map((type, index) => (
                   <Pressable
                     key={index}
-                    onPress={() => {
-                      const id = index;
-                      router.push({
-                        pathname: ROUTE_TEMPLATE,
-                        params: { id, name: `New ${type.name}` },
-                      });
+                    onPress={async () => {
+                      try {
+                        const data = await queryClient.fetchQuery({
+                          queryKey: ["createDocument", type.id],
+                          queryFn: () => callCreateDocument(type.id),
+                        });
+                        router.push({
+                          pathname: ROUTE_TEMPLATE,
+                          params: { id: data.id, name: `New ${type.name}` },
+                        });
+                      } catch (error) {
+                        console.error("Error creating document:", error);
+                      }
                     }}
                     cooldown={1000}
                   >

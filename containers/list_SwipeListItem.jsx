@@ -1,7 +1,9 @@
-import { useStripe } from "@stripe/stripe-react-native";
+import { usePaymentSheet } from "@stripe/stripe-react-native";
+import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Clock, HandCoins, StepForward } from "lucide-react-native";
 import { Platform, View } from "react-native";
+import { callNewPayment } from "../api/payment";
 import { useLoader } from "../components/loader";
 import Pressable from "../components/Pressable";
 import Text from "../components/Text";
@@ -10,9 +12,11 @@ import Colors from "../constants/color";
 import { ROUTE_TEMPLATE } from "../constants/routes";
 
 export default function SwipeListItem({ item }) {
-  const { initPaymentSheet, presentPaymentSheet } = useStripe();
+  const { initPaymentSheet, presentPaymentSheet } = usePaymentSheet();
   const { showLoader, hideLoader } = useLoader();
   const { showToast } = useToast();
+  const queryClient = useQueryClient();
+
   return (
     <Pressable
       className={`py-5 mb-4 bg-white  ${
@@ -22,25 +26,37 @@ export default function SwipeListItem({ item }) {
       }`}
       onPress={async () => {
         switch (item.status) {
-          case 0:
+          case 0: // DRAFT
             router.push({ pathname: ROUTE_TEMPLATE, params: { id: item.id } });
             break;
-          case 1:
+          case 1: // PENDING PAYMENT
             try {
               showLoader();
-              initPaymentSheet({
-                paymentIntentClientSecret: "pi_1234567890",
-                returnURL: "stripe-redirect",
+              const data = await queryClient.fetchQuery({
+                queryKey: ["newPayment", item.id],
+                queryFn: () => callNewPayment(item.id),
               });
-              await new Promise((resolve) => setTimeout(resolve, 1000));
+
+              const { error } = await initPaymentSheet({
+                ...data?.data,
+                merchantDisplayName: "DocPro",
+                returnURL: "docpro://stripe-redirect",
+              });
+              if (error) throw new Error(error.message);
               hideLoader();
-              await presentPaymentSheet();
+
+              await new Promise((resolve) => setTimeout(resolve, 1000));
+
+              const errors = await presentPaymentSheet();
+              if (errors) throw new Error(errors["error"]["message"]);
             } catch (error) {
-              showToast(error.message);
+              showToast({ message: error.message });
+              console.log(error.message);
             } finally {
+              hideLoader();
             }
             break;
-          case 2:
+          case 2: // COMPLETED
             // const url = "https://pdfobject.com/pdf/sample.pdf";
             // if (Platform.OS === "ios") {
             //   WebBrowser.dismissBrowser();

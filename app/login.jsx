@@ -42,6 +42,7 @@ function Login() {
             control={control}
             name="password"
             twClass="mt-4"
+            textContentType="oneTimeCode" // fix ios issue
           />
           <FieldError error={errors.password} />
           {currentScreen === "signup" && (

@@ -1,7 +1,9 @@
+import { useQuery } from "@tanstack/react-query";
 import { Tabs, useRouter } from "expo-router";
 import { FileText, Plus } from "lucide-react-native";
 import React from "react";
 import { View } from "react-native";
+import { callGetMe } from "../../../api/user";
 import Pressable from "../../../components/Pressable";
 import Text from "../../../components/Text";
 import Colors from "../../../constants/color";
@@ -9,6 +11,10 @@ import { ROUTE_HOME, ROUTE_LIST } from "../../../constants/routes";
 
 const CustomTabBar = ({ state, descriptors, navigation }) => {
   const router = useRouter();
+  const { data = {} } = useQuery({
+    queryKey: ["me"],
+    queryFn: callGetMe,
+  });
 
   return (
     <View className="flex-row items-center justify-center w-screen h-20 p-5 bg-white">
@@ -51,9 +57,11 @@ const CustomTabBar = ({ state, descriptors, navigation }) => {
             My documents
           </Text>
         </View>
-        <View className="absolute flex items-center justify-center w-6 h-6 rounded-full -top-4 -right-4 bg-payment">
-          <Text twClass="text-white">1</Text>
-        </View>
+        {data?.documents?.unpaid > 0 && (
+          <View className="absolute flex items-center justify-center w-6 h-6 rounded-full -top-4 -right-4 bg-payment">
+            <Text twClass="text-white">{data?.documents?.unpaid}</Text>
+          </View>
+        )}
       </Pressable>
     </View>
   );

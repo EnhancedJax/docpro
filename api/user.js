@@ -11,6 +11,7 @@ export const callGetMe = async () => {
     dob: "1990-01-01",
     documents: {
       count: 6,
+      unpaid: 2,
       items: [
         {
           id: "1",
@@ -79,3 +80,7 @@ export const callUpdatePassword = async () => {
   // Dummy response
   throw new Error("Password does not match");
 };
+
+// export const callGetMe = () => api.get(`/user`);
+// export const callUpdateMe = (key, value) => api.patch(`/user`, { [key]: value });
+// export const callUpdatePassword = (newPassword, oldPassword) => api.post(`/user/editPassword`, { newPassword, oldPassword });

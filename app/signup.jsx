@@ -14,7 +14,7 @@ import QuestionCard from "../components/QuestionCard";
 import { useToast } from "../components/toast";
 import { ROUTE_HOME } from "../constants/routes";
 import { FIELDS } from "../constants/user";
-import useKeyboardOpen from "../hooks/useKeyboardOpen";
+import useKeyboard from "../hooks/useKeyboard";
 import { useAuth } from "../providers/auth";
 
 export default function Index() {
@@ -34,7 +34,7 @@ export default function Index() {
     }, {}),
   });
   const rootNavigation = useNavigationContainerRef();
-  const isKeyboardOpen = useKeyboardOpen();
+  const { isKeyboardOpen } = useKeyboard();
   useEffect(() => {
     Keyboard.dismiss();
   }, [progress]);

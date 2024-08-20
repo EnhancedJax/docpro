@@ -45,7 +45,9 @@ export default function RootLayout() {
   }
 
   SplashScreen.hideAsync();
-  NavigationBar.setBackgroundColorAsync("transparent");
+  if (Platform.OS === "android") {
+    NavigationBar.setBackgroundColorAsync("transparent");
+  }
 
   return (
     <ToastProvider>
@@ -60,7 +62,10 @@ export default function RootLayout() {
               }}
             >
               <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <KeyboardAvoidingView behavior="padding" style={{ flex: 1 }}>
+                <KeyboardAvoidingView
+                  behavior={Platform.OS === "ios" ? "padding" : "height"}
+                  style={{ flex: 1 }}
+                >
                   <Stack screenOptions={{ headerShown: false }}>
                     <Stack.Screen name="index" />
                     <Stack.Screen name="login" />

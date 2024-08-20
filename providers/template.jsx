@@ -1,23 +1,24 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { StackActions } from "@react-navigation/native";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   router,
   useLocalSearchParams,
   useNavigation,
   useNavigationContainerRef,
 } from "expo-router";
-import React, {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
+import {
+  callGetDocument,
+  callGetDocumentQuestions,
+  callUpdateDocument,
+} from "../api/document";
 import { useLoader } from "../components/loader";
 import { useToast } from "../components/toast";
 import { ROUTE_LIST } from "../constants/routes";
+import { generateSchema } from "../utils/template";
 
 const TemplateContext = createContext();
 export const useTemplate = () => useContext(TemplateContext);
@@ -34,8 +35,11 @@ function TemplateProvider({ children }) {
     mode: "onChange",
     resolver: yupResolver(schema),
   });
-  const { watch, getValues } = form;
+  const { watch, getValues, reset } = form;
   const rootNavigation = useNavigationContainerRef();
+  const [questionItem, setQuestionItem] = useState(null);
+
+  //#region Helpers
 
   const popNavigation = () => {
     if (rootNavigation?.canGoBack()) {
@@ -43,127 +47,53 @@ function TemplateProvider({ children }) {
     }
   };
 
-  const questionItem = useMemo(() => {
-    return [
-      {
+  //#region APIs
+  const { data: documentData } = useQuery({
+    queryKey: ["document", id],
+    queryFn: () => callGetDocument(id),
+  });
+  const fetchedDocumentData = documentData?.type !== undefined;
+  const { data: questionsData, isSuccess } = useQuery({
+    queryKey: ["documentQuestions", documentData?.type],
+    queryFn: () => callGetDocumentQuestions(documentData?.type),
+    enabled: fetchedDocumentData,
+  });
+
+  useEffect(() => {
+    showLoader();
+    if (questionsData) {
+      // adds the name to the first question
+      questionsData.items.unshift({
         question: "Give your document a name",
         type: "text",
         placeholder: defaultName,
         min: 1,
-        max: 10,
-      },
-      {
-        question: "Please select types of documents you have",
-        description: "This is a description",
-        type: "checkbox",
-        options: ["A", "B", "C"],
-        min: 1,
-        max: 3,
-      },
-      {
-        question: "Are you a permanent resident of Hong Kong?",
-        description: "This is a description",
-        type: "radio",
-        options: ["Yes", "No"],
-      },
-      {
-        question: "When did your term start?",
-        description: "This is a description",
-        type: "date",
-        min: new Date(new Date().setMonth(new Date().getMonth() - 1)),
-        max: new Date(new Date().setMonth(new Date().getMonth() + 1)),
-      },
-      {
-        question: "What is your permanent address?",
-        description: "This is a description",
-        type: "textarea",
-        placeholder: "Enter your address",
-        min: 1,
         max: 40,
-      },
-      {
-        question: "What is your monthly income?",
-        description: "This is a description",
-        type: "number",
-        placeholder: "Enter your monthly income",
-        min: 1,
-        max: 1000000,
-      },
-    ];
-  }, [defaultName]);
+      });
+      setQuestionItem(questionsData.items);
+      setSchema(generateSchema(questionsData.items));
 
-  useEffect(() => {
-    const generatedSchema = yup.object().shape(
-      questionItem.reduce((acc, question, index) => {
-        switch (question.type) {
-          case "text":
-          case "textarea":
-            acc[index] = yup
-              .string()
-              .min(question.min, `Minimum ${question.min} characters`)
-              .max(question.max, `Maximum ${question.max} characters`)
-              .required("This field is required");
-            break;
-          case "checkbox":
-            acc[index] = yup
-              .array()
-              .of(yup.string())
-              .min(question.min, `Select at least ${question.min} option(s)`)
-              .max(question.max, `Select at most ${question.max} option(s)`)
-              .required("This field is required");
-            break;
-          case "radio":
-            acc[index] = yup
-              .string()
-              .oneOf(question.options, "Invalid option")
-              .required("This field is required");
-            break;
-          case "date":
-            acc[index] = yup
-              .date()
-              .min(
-                question.min,
-                `Date must be after ${question.min.toDateString()}`
-              )
-              .max(
-                question.max,
-                `Date must be before ${question.max.toDateString()}`
-              )
-              .required("This field is required");
-            break;
-          case "number":
-            acc[index] = yup
-              .number()
-              .typeError("Please enter a number")
-              .min(question.min, `Minimum value is ${question.min}`)
-              .max(question.max, `Maximum value is ${question.max}`)
-              .required("This field is required");
-            break;
-        }
-        return acc;
-      }, {})
-    );
-    setSchema(generatedSchema);
-  }, [questionItem]);
+      // document answers is an array of arrays. How
+      const documentName = documentData?.name;
+      const documentAnswers = documentData?.data.reduce(
+        (acc, answer, index) => {
+          acc[index + 1] = answer;
+          return acc;
+        },
+        {}
+      );
+      documentAnswers["0"] = documentName;
+      reset(documentAnswers);
+      setProgress(Object.keys(documentAnswers).length - 1);
+      hideLoader();
+    }
+  }, [questionsData]);
 
-  useEffect(() => {
-    const subscription = watch((value, { name, type }) => {
-      const index = parseInt(name);
-      const nextIsUnanswered = value[index + 1] === undefined;
-      const currentIsEmpty =
-        value[name] === "" ||
-        value[name] === undefined ||
-        (Array.isArray(value[name]) && value[name].length === 0);
-      if (nextIsUnanswered) {
-        if (currentIsEmpty) {
-          setProgress(index);
-        } else {
-          setProgress(index + 1);
-        }
-      }
-    });
-    return () => subscription.unsubscribe();
-  }, [watch]);
+  const updateMutation = useMutation({
+    mutationFn: ({ name, data }) => callUpdateDocument(id, name, data),
+  });
+
+  //#region Callbacks
 
   const submit = async (finished = false) => {
     const data = getValues();
@@ -175,10 +105,9 @@ function TemplateProvider({ children }) {
       }
       return acc;
     }, []);
-    console.log("Create update document request", name, formattedData);
     try {
       showLoader();
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await updateMutation.mutateAsync({ name, data: formattedData });
     } catch (error) {
       console.log(error);
     } finally {
@@ -221,6 +150,28 @@ function TemplateProvider({ children }) {
     });
   };
 
+  //#region UseEffects
+
+  useEffect(() => {
+    const subscription = watch((value, { name, type }) => {
+      if (name === undefined) return;
+      const index = parseInt(name);
+      const nextIsUnanswered = value[index + 1] === undefined;
+      const currentIsEmpty =
+        value[name] === "" ||
+        value[name] === undefined ||
+        (Array.isArray(value[name]) && value[name].length === 0);
+      if (nextIsUnanswered) {
+        if (currentIsEmpty) {
+          setProgress(index);
+        } else {
+          setProgress(index + 1);
+        }
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [watch]);
+
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (e) => {
       if (prematureHandledRemove) return;
@@ -233,6 +184,10 @@ function TemplateProvider({ children }) {
   useEffect(() => {
     console.log("New", id, defaultName);
   }, []);
+
+  if (!fetchedDocumentData || !isSuccess || !questionItem) {
+    return null;
+  }
 
   return (
     <TemplateContext.Provider

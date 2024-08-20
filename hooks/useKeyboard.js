@@ -1,8 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { Keyboard } from "react-native";
 
-const useKeyboardOpen = (waitUntilShown = false) => {
+const useKeyboard = (waitUntilShown = false) => {
   const [isKeyboardOpen, setIsKeyboardOpen] = useState(false);
+  const [keyboardHeight, setKeyboardHeight] = useState(0);
   const verb = useMemo(
     () => (waitUntilShown ? "Did" : "Will"),
     [waitUntilShown]
@@ -11,11 +12,17 @@ const useKeyboardOpen = (waitUntilShown = false) => {
   useEffect(() => {
     const keyboardOpenListener = Keyboard.addListener(
       `keyboard${verb}Show`,
-      () => setIsKeyboardOpen(true)
+      (e) => {
+        setIsKeyboardOpen(true);
+        setKeyboardHeight(e.endCoordinates.height);
+      }
     );
     const keyboardCloseListener = Keyboard.addListener(
       `keyboard${verb}Hide`,
-      () => setIsKeyboardOpen(false)
+      () => {
+        setIsKeyboardOpen(false);
+        setKeyboardHeight(0);
+      }
     );
 
     return () => {
@@ -24,7 +31,7 @@ const useKeyboardOpen = (waitUntilShown = false) => {
     };
   }, []);
 
-  return isKeyboardOpen;
+  return { isKeyboardOpen, keyboardHeight };
 };
 
-export default useKeyboardOpen;
+export default useKeyboard;

@@ -1,7 +1,7 @@
-// export const callLoginUser = (credentials) => api.post("/login", credentials);
-// export const callSignupUser = (userData) => api.post("/signup", userData);
-// export const callLogoutUser = () => api.post("/logout");
-// export const callRefreshToken = () => api.post("/refresh-token");
+// export const callLoginUser = (credentials) => api.post("/user/login", credentials);
+// export const callSignupUser = (userData) => api.post("/user/signup", userData);
+// export const callLogoutUser = () => api.post("/user/logout");
+// export const callRefreshToken = () => api.post("/jwt");
 
 export const callLoginUser = async (data) => {
   // Simulating API call with a timeout

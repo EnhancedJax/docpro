@@ -4,8 +4,9 @@ import Button from "../../components/Button";
 import CardCarousel from "../../components/CardCarousel";
 import PageDots from "../../components/PageDots";
 import QuestionCard from "../../components/QuestionCard";
-import useKeyboardOpen from "../../hooks/useKeyboardOpen";
+import useKeyboard from "../../hooks/useKeyboard";
 import { useTemplate, withTemplateProvider } from "../../providers/template";
+
 function Template() {
   const [activeIndex, setActiveIndex] = useState(0);
   const [goToIndex, setGoToIndex] = useState(null);
@@ -19,11 +20,10 @@ function Template() {
   } = useTemplate();
   const {
     control,
-    handleSubmit,
     formState: { errors, isValid },
   } = form;
 
-  const isKeyboardOpen = useKeyboardOpen();
+  const { isKeyboardOpen } = useKeyboard();
   useEffect(() => {
     Keyboard.dismiss();
   }, [activeIndex]);
