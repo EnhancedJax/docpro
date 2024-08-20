@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { ClockArrowDown, ClockArrowUp, Search } from "lucide-react-native";
-import { ScrollView, View } from "react-native";
+import { View } from "react-native";
 import { callGetDocumentTypes } from "../api/document";
+import ButtonedScrollView from "../components/ButtonedScrollView";
 import Input from "../components/Input";
 import Pressable from "../components/Pressable";
 import Text from "../components/Text";
@@ -43,14 +44,7 @@ export default function FilterView({ filter, setFilter }) {
           )}
         </Pressable>
       </View>
-      <ScrollView
-        horizontal
-        className="flex flex-row "
-        style={{
-          overflow: "visible",
-        }}
-        showsHorizontalScrollIndicator={false}
-      >
+      <ButtonedScrollView arrowOffset={-24}>
         {documentTypes?.items &&
           documentTypes?.items?.map((type, index) => (
             <Pressable
@@ -75,7 +69,7 @@ export default function FilterView({ filter, setFilter }) {
               </Text>
             </Pressable>
           ))}
-      </ScrollView>
+      </ButtonedScrollView>
     </View>
   );
 }

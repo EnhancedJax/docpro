@@ -9,6 +9,7 @@ import {
   Ubuntu_700Bold_Italic,
   useFonts,
 } from "@expo-google-fonts/ubuntu";
+import * as NavigationBar from "expo-navigation-bar";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import {
@@ -38,11 +39,13 @@ export default function RootLayout() {
     Ubuntu_700Bold,
     Ubuntu_700Bold_Italic,
   });
+
   if (!loaded) {
     return null;
   }
 
   SplashScreen.hideAsync();
+  NavigationBar.setBackgroundColorAsync("transparent");
 
   return (
     <ToastProvider>

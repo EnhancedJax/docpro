@@ -7,7 +7,7 @@ export const callGetMe = async () => {
     id: "123",
     email: "test@test.com",
     name: "hs",
-    gender: "male",
+    gender: "Male",
     dob: "1990-01-01",
     documents: {
       count: 6,
@@ -16,14 +16,14 @@ export const callGetMe = async () => {
           id: "1",
           title: "Document 1",
           type: 2,
-          date: new Date(),
+          date: new Date(new Date().setDate(new Date().getDate() - 1)),
           status: 2,
         },
         {
           id: "2",
           title: "Document 2",
           type: 0,
-          date: new Date(),
+          date: new Date(new Date().setDate(new Date().getDate() - 2)),
           status: 1,
         },
         {

@@ -1,7 +1,8 @@
 import { Eye, EyeOff } from "lucide-react-native";
 import React, { useState } from "react";
 import { Controller } from "react-hook-form";
-import { TextInput, TouchableOpacity, View } from "react-native";
+import { TextInput, View } from "react-native";
+import Colors from "../constants/color";
 import Pressable from "./Pressable";
 
 export default function Input({
@@ -69,14 +70,13 @@ export default function Input({
             <Pressable
               className="absolute top-0 right-0 flex items-center justify-center px-4 "
               style={{ height }}
+              onPress={() => setShowPassword(!showPassword)}
             >
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                {showPassword ? (
-                  <EyeOff size={20} color="#8696BB" />
-                ) : (
-                  <Eye size={20} color="#8696BB" />
-                )}
-              </TouchableOpacity>
+              {showPassword ? (
+                <EyeOff size={20} color={Colors.tgray} />
+              ) : (
+                <Eye size={20} color={Colors.tgray} />
+              )}
             </Pressable>
           )}
         </View>

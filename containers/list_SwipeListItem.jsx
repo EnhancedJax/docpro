@@ -76,10 +76,34 @@ export default function SwipeListItem({ item }) {
             <Text twClass="text-base">{item.title}</Text>
             <Text twClass="text-tgray text-sm">{item.type}</Text>
           </View>
-          <View className="flex flex-row">
+          <View className="flex flex-row items-center">
             <Clock size={16} color={Colors.tgray} />
             <Text twClass="text-tgray text-sm ml-2">
-              {item?.date?.toLocaleDateString()}
+              {(() => {
+                const now = new Date();
+                const itemDate = new Date(item?.date);
+                const diffInMinutes = (now - itemDate) / (1000 * 60);
+
+                if (diffInMinutes < 5) {
+                  return "Just Now";
+                } else if (itemDate.getDate() === now.getDate() - 1) {
+                  return (
+                    "Yesterday at " +
+                    itemDate.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  );
+                } else {
+                  return itemDate.toLocaleString([], {
+                    year: "numeric",
+                    month: "long",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+                }
+              })()}
             </Text>
           </View>
         </View>
