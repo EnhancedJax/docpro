@@ -1,3 +1,4 @@
+import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef } from "react";
 import {
   Dimensions,
@@ -87,6 +88,10 @@ export default function CardCarousel({
       }
     },
   });
+
+  useEffect(() => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  }, [activeIndex]);
 
   useEffect(() => {
     if (goToIndex !== null) {

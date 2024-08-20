@@ -64,6 +64,7 @@ export default function RootLayout() {
     <Tabs
       screenOptions={{
         headerShown: false,
+        // unmountOnBlur: true,
       }}
       tabBar={(props) => <CustomTabBar {...props} />}
     >

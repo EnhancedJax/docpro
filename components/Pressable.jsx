@@ -5,6 +5,7 @@ export default function Pressable({
   children,
   onPress = () => {},
   cooldown = 0,
+  animationDuration = 100,
   ...props
 }) {
   const [isPressed, setIsPressed] = useState(false);
@@ -15,12 +16,14 @@ export default function Pressable({
   const handlePressIn = () => {
     setIsPressed(true);
     Animated.parallel([
-      Animated.spring(scaleAnim, {
+      Animated.timing(scaleAnim, {
         toValue: 0.95,
+        duration: animationDuration,
         useNativeDriver: true,
       }),
-      Animated.spring(opacityAnim, {
+      Animated.timing(opacityAnim, {
         toValue: 0.5,
+        duration: animationDuration,
         useNativeDriver: true,
       }),
     ]).start();
@@ -29,12 +32,14 @@ export default function Pressable({
   const handlePressOut = () => {
     setIsPressed(false);
     Animated.parallel([
-      Animated.spring(scaleAnim, {
+      Animated.timing(scaleAnim, {
         toValue: 1,
+        duration: animationDuration,
         useNativeDriver: true,
       }),
-      Animated.spring(opacityAnim, {
+      Animated.timing(opacityAnim, {
         toValue: 1,
+        duration: animationDuration,
         useNativeDriver: true,
       }),
     ]).start();
