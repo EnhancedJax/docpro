@@ -46,7 +46,6 @@
     "react-hook-form": "^7.52.2",
     "react-i18next": "^15.0.0",
     "react-native": "0.74.3",
-    "react-native-date-picker": "^5.0.4",
     "react-native-gesture-handler": "~2.16.1",
     "react-native-gradients": "^2.1.1",
     "react-native-modal-datetime-picker": "^17.1.0",

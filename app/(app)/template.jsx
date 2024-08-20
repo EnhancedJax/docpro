@@ -36,7 +36,7 @@ function Template() {
           onPress={handleSaveAsDraft}
           className="flex-1 mr-2"
         >
-          Save as Draft
+          Save Draft
         </Button>
         <Button
           type={

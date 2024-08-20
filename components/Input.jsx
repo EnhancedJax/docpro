@@ -14,6 +14,12 @@ export default function Input({
   ...props
 }) {
   const [showPassword, setShowPassword] = useState(false);
+  const [height, setHeight] = useState(0);
+
+  const onLayout = (event) => {
+    const { height } = event.nativeEvent.layout;
+    setHeight(height);
+  };
 
   const fontFamily = light
     ? "Ubuntu_300Light"
@@ -25,6 +31,7 @@ export default function Input({
 
   const renderTextInput = (field) => (
     <TextInput
+      onLayout={onLayout}
       secureTextEntry={type === "password" && !showPassword}
       className={`px-3 p-4 text-base rounded-full bg-gray ${
         type === "password" ? "pr-10" : ""
@@ -48,7 +55,10 @@ export default function Input({
         <View className={`relative ${props.twClass || ""}`}>
           {renderTextInput({ value, onChangeText: onChange, onBlur })}
           {type === "password" && (
-            <View className="absolute top-0 flex items-center justify-center h-12 right-3">
+            <View
+              className="absolute top-0 flex items-center justify-center right-4"
+              style={{ height }}
+            >
               <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
                 {showPassword ? (
                   <EyeOff size={20} color="#8696BB" />

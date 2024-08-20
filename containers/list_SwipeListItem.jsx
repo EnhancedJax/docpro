@@ -1,13 +1,13 @@
 import { useStripe } from "@stripe/stripe-react-native";
 import { router } from "expo-router";
 import { Clock, HandCoins, StepForward } from "lucide-react-native";
-import { View } from "react-native";
+import { Platform, View } from "react-native";
 import { useLoader } from "../components/loader";
 import Pressable from "../components/Pressable";
 import Text from "../components/Text";
 import { useToast } from "../components/toast";
 import Colors from "../constants/color";
-import { ROUTE_TEMPLATE, ROUTE_VIEW } from "../constants/routes";
+import { ROUTE_TEMPLATE } from "../constants/routes";
 
 export default function SwipeListItem({ item }) {
   const { initPaymentSheet, presentPaymentSheet } = useStripe();
@@ -15,7 +15,11 @@ export default function SwipeListItem({ item }) {
   const { showToast } = useToast();
   return (
     <Pressable
-      className="py-5 mb-4 bg-white rounded-lg shadow-md"
+      className={`py-5 mb-4 bg-white  ${
+        Platform.OS === "ios"
+          ? "shadow-lg rounded-lg"
+          : "border border-neutral-200 rounded-2xl"
+      }`}
       onPress={async () => {
         switch (item.status) {
           case 0:
@@ -37,10 +41,16 @@ export default function SwipeListItem({ item }) {
             }
             break;
           case 2:
-            router.push({
-              pathname: ROUTE_VIEW,
-              params: { id: item.id, title: item.title },
-            });
+            // const url = "https://pdfobject.com/pdf/sample.pdf";
+            // if (Platform.OS === "ios") {
+            //   WebBrowser.dismissBrowser();
+            //   WebBrowser.openBrowserAsync(url);
+            // } else {
+            //   IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
+            //     type: "application/pdf",
+            //     data: url,
+            //   });
+            // }
             break;
         }
       }}

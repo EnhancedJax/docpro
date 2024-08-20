@@ -1,7 +1,7 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { Download, X } from "lucide-react-native";
 import { View } from "react-native";
-import PDFViewer from "../../components/PDFViewer";
+// import PDFViewer from "../../components/PDFViewer";
 import Pressable from "../../components/Pressable";
 import Text from "../../components/Text";
 
@@ -22,9 +22,7 @@ export default function ViewPDF() {
           </Pressable>
         </View>
       </View>
-      <View className="flex-1 ">
-        <PDFViewer />
-      </View>
+      <View className="flex-1 ">{/* <PDFViewer /> */}</View>
     </View>
   );
 }
