@@ -1,15 +1,17 @@
 import { StripeProvider } from "@stripe/stripe-react-native";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocalSearchParams } from "expo-router";
 import { Check, NotepadTextDashed, Squirrel } from "lucide-react-native";
 import { forwardRef, useEffect, useState } from "react";
 import { Alert, Platform, View } from "react-native";
 import { SwipeListView } from "react-native-swipe-list-view";
+import { callDeleteDocument } from "../../../api/document";
 import { callGetMe } from "../../../api/user";
 import GradientMask from "../../../components/GradientMask";
 import Loader from "../../../components/loader";
 import Pressable from "../../../components/Pressable";
 import Text from "../../../components/Text";
+import { useToast } from "../../../components/toast";
 import Colors from "../../../constants/color";
 import FilterView from "../../../containers/list_FilterView";
 import SwipeListItem from "../../../containers/list_SwipeListItem";
@@ -20,18 +22,35 @@ export default function List() {
     sort: 1,
     type: null,
   });
-  const { finished, finishedId, tab: defaultTab } = useLocalSearchParams();
-  const [tab, setTab] = useState(defaultTab || "finished");
+  const { showToast } = useToast();
+  const { finished, finishedId } = useLocalSearchParams();
+  const [tab, setTab] = useState(finished ? "finished" : "drafts");
   const { data = {}, isFetched } = useQuery({
     queryKey: ["me"],
     queryFn: callGetMe,
   });
+  const queryClient = useQueryClient();
+
+  const deleteMutation = useMutation({
+    mutationFn: callDeleteDocument,
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
+      showToast({
+        message: "Document deleted",
+        type: "success",
+      });
+    },
+  });
 
   useEffect(() => {
-    if (finished && finishedId) {
-      console.log("Finished", finished, finishedId);
+    if (isFetched && finished === undefined) {
+      if (
+        data.documents.items.filter((item) => item.status !== 0).length === 0
+      ) {
+        setTab("drafts");
+      }
     }
-  }, []);
+  }, [finished, finishedId, isFetched]);
 
   const RenderHiddenItem = forwardRef(({ item, tab }, ref) => {
     if (tab === "finished") {
@@ -52,7 +71,7 @@ export default function List() {
               { text: "Cancel", style: "cancel" },
               {
                 text: "Delete",
-                onPress: () => console.log("Deleted"),
+                onPress: () => deleteMutation.mutate(item.id),
               },
             ]
           );
@@ -64,7 +83,7 @@ export default function List() {
   });
 
   if (!isFetched) {
-    return <Loader />;
+    return <Loader visible />;
   }
 
   return (
@@ -117,7 +136,7 @@ export default function List() {
           </Pressable>
         </View>
         <FilterView filter={filter} setFilter={setFilter} />
-        <View className="flex flex-row flex-1">
+        <View className="flex flex-row flex-1 pb-6">
           <GradientMask intensity={5}>
             <SwipeListView
               showsVerticalScrollIndicator={false}
@@ -131,7 +150,7 @@ export default function List() {
                         item.title
                           .toLowerCase()
                           .includes(filter.searchQuery.toLowerCase())) &&
-                      (filter.type === null || item.type === filter.type) &&
+                      (filter.type === null || item.type.id === filter.type) &&
                       (tab === "finished"
                         ? item.status !== 0
                         : item.status === 0)
@@ -139,7 +158,9 @@ export default function List() {
                   })
                   .sort((a, b) => {
                     const statusComparison = a.status - b.status;
-                    const dateComparison = filter.sort * (b.date - a.date);
+                    const dateComparison =
+                      filter.sort *
+                      (new Date(b.date).getTime() - new Date(a.date).getTime());
                     return statusComparison !== 0
                       ? statusComparison
                       : dateComparison;

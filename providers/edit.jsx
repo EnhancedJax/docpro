@@ -1,11 +1,21 @@
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useMutation } from "@tanstack/react-query";
-import { router, useLocalSearchParams, useNavigation } from "expo-router";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import {
+  router,
+  useLocalSearchParams,
+  useNavigation,
+  useNavigationContainerRef,
+} from "expo-router";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
+import { Keyboard } from "react-native";
 import { callUpdateMe, callUpdatePassword } from "../api/user";
 import { useToast } from "../components/toast";
-import { emailSchema, passwordSchema, requiredSchema } from "../schema/edit";
+import { ROUTE_LOGIN } from "../constants/routes";
+import { FIELDS } from "../constants/user";
+import { emailSchema, passwordSchema } from "../schema/edit";
+import { generateSchema } from "../utils/template";
+import { useAuth } from "./auth";
 
 const EditContext = createContext();
 export const useEdit = () => useContext(EditContext);
@@ -13,6 +23,7 @@ export const useEdit = () => useContext(EditContext);
 function EditProvider({ children }) {
   const { index, value, isPassword: isPasswordString } = useLocalSearchParams();
   const [saved, setSaved] = useState(false);
+  const { logout } = useAuth();
   const isPassword = useMemo(
     () => isPasswordString === "true",
     [isPasswordString]
@@ -27,41 +38,75 @@ function EditProvider({ children }) {
         ? passwordSchema
         : index < 0
         ? emailSchema(value)
-        : requiredSchema
+        : generateSchema([FIELDS[index]])
     ),
     defaultValues: {
-      0: value,
+      [index === "-1" ? "email" : !isPassword ? FIELDS[index].key : "0"]: value,
     },
   });
   const navigation = useNavigation();
   const { showToast } = useToast();
+  const queryClient = useQueryClient();
+  const rootNavigation = useNavigationContainerRef();
+
+  const popNavigation = () => {
+    if (rootNavigation?.canGoBack()) {
+      rootNavigation.dispatch(StackActions.popToTop());
+    }
+  };
 
   const editUserMutation = useMutation({
+    retry: false,
     mutationFn: callUpdateMe,
-    onSuccess: () => {
+    onSuccess: async () => {
       setSaved(true);
       showToast({
         message: "Changes saved",
         type: "success",
+      });
+      await queryClient.invalidateQueries({
+        queryKey: ["me"],
+        refetchType: "all",
       });
       router.back();
     },
   });
 
   const editPasswordMutation = useMutation({
+    retry: false,
     mutationFn: callUpdatePassword,
     onSuccess: () => {
       setSaved(true);
-      showToast({
-        message: "Changes saved",
-        type: "success",
+      Keyboard.dismiss();
+      logout(() => {
+        showToast({
+          message: "Password changed, please login again",
+          type: "success",
+        });
+        router.replace(ROUTE_LOGIN);
       });
-      router.back();
+    },
+    onError: (error) => {
+      if (error.response?.status === 400) {
+        showToast({
+          message: "Password does not match",
+          type: "danger",
+        });
+      } else {
+        showToast({
+          message: error.message,
+          type: "danger",
+        });
+      }
     },
   });
 
   const onSubmit = (data) => {
-    editUserMutation.mutate(data);
+    const key = index === "-1" ? "email" : FIELDS[index].key;
+    editUserMutation.mutate({
+      key,
+      value: data[key] instanceof Date ? data[key].toISOString() : data[key],
+    });
   };
 
   const onPasswordSubmit = (data) => {

@@ -1,58 +1,37 @@
-// export const callLoginUser = (credentials) => api.post("/user/login", credentials);
-// export const callSignupUser = (userData) => api.post("/user/signup", userData);
-// export const callLogoutUser = () => api.post("/user/logout");
-// export const callRefreshToken = () => api.post("/jwt");
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { REFRESH_TOKEN_KEY } from "../constants";
+import { api } from "./index";
 
-export const callLoginUser = async (data) => {
-  // Simulating API call with a timeout
-  await new Promise((resolve) => setTimeout(resolve, 100));
-
-  // Dummy response
-  const response = {
-    accessToken: "ABC",
-    refreshToken: "DEF",
-  };
-
-  if (response.accessToken) {
-    return response;
-  } else {
-    throw new Error("Login failed");
-  }
+export const callLoginUser = async ({ credentials }) => {
+  console.log("callLoginUser", credentials);
+  const response = await api.post("/user/login", credentials);
+  return response.data;
 };
 
-export const callSignupUser = async (data) => {
-  // Simulating API call with a timeout
-  await new Promise((resolve) => setTimeout(resolve, 100));
-
-  // Dummy response
-  const response = {
-    accessToken: "ABC",
-    refreshToken: "DEF",
-  };
-
-  if (response.accessToken) {
-    return response;
-  } else {
-    throw new Error("Signup failed");
-  }
+export const callSignupUser = async ({ userData }) => {
+  console.log("callSignupUser", userData);
+  const response = await api.post("/user/signup", userData);
+  return response.data;
 };
 
-export const callLogoutUser = async (data) => {
-  // Simulating API call with a timeout
-  await new Promise((resolve) => setTimeout(resolve, 100));
-
-  // Dummy response
-  return {
-    message: "Logout successful",
-  };
+export const callLogoutUser = async () => {
+  const { data } = await api.post("/user/logout");
+  return data;
 };
 
-export const callRefreshToken = async (data) => {
-  // Simulating API call with a timeout
-  await new Promise((resolve) => setTimeout(resolve, 100));
+export const callRefreshToken = async () => {
+  const refreshToken = await AsyncStorage.getItem(REFRESH_TOKEN_KEY);
+  console.log("callRefreshToken", refreshToken.substring(0, 10));
+  return await api.get("/user/refreshTokenRotation", {
+    headers: {
+      Authorization: `Bearer ${refreshToken}`,
+    },
+  });
+};
 
-  // Dummy response
-  return {
-    accessToken: "ABC",
-  };
+export const callCheckEmail = async ({ email }) => {
+  console.log("callCheckEmail", email);
+  return await api.post("/user/checkEmail", {
+    payload: { email },
+  });
 };

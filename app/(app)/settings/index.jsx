@@ -29,14 +29,15 @@ export default function EditUser() {
     }
   };
 
-  const handleLogout = async () => {
-    await logout();
-    showToast({
-      message: "Logout successful!",
-      type: "success",
+  const handleLogout = () => {
+    logout(() => {
+      showToast({
+        message: "Logout successful!",
+        type: "success",
+      });
+      popNavigation();
+      router.replace(ROUTE_LOGIN);
     });
-    popNavigation();
-    router.replace(ROUTE_LOGIN);
   };
 
   if (!isFetched) return <Loader visible />;
@@ -56,7 +57,7 @@ export default function EditUser() {
                     pathname: ROUTE_SETTINGS_EDIT,
                     params: {
                       index: isEmail ? -1 : index - 1,
-                      value: isEmail ? data[field.key] : data[field.key],
+                      value: data[field.key],
                       isPassword: "false",
                     },
                   });
@@ -65,9 +66,7 @@ export default function EditUser() {
                 <View className="absolute flex-row items-center h-full ">
                   <PenLine size={16} color={Colors.text} />
                 </View>
-                <Text twClass="text-base ml-8">
-                  {isEmail ? data[field.key] : data[field.key]}
-                </Text>
+                <Text twClass="text-base ml-8">{data[field.key]}</Text>
               </Pressable>
             </View>
           );

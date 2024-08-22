@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { ArrowRight, Cog } from "lucide-react-native";
 import { ScrollView, View } from "react-native";
@@ -15,9 +15,19 @@ import { ROUTE_SETTINGS, ROUTE_TEMPLATE } from "../../../constants/routes";
 
 export default function New() {
   const queryClient = useQueryClient();
-  const { data: documentTypes = {}, isFetched } = useQuery({
+  const { data: documentTypes = [], isFetched } = useQuery({
     queryKey: ["documentTypes"],
     queryFn: callGetDocumentTypes,
+  });
+  const newDocumentMutation = useMutation({
+    mutationFn: callCreateDocument,
+    onSuccess: async (data, { newDocumentNamePlaceholder }) => {
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
+      router.push({
+        pathname: ROUTE_TEMPLATE,
+        params: { id: data.id, name: newDocumentNamePlaceholder },
+      });
+    },
   });
 
   if (!isFetched) {
@@ -35,6 +45,10 @@ export default function New() {
         <Pressable
           className="p-4 rounded-full"
           onPress={() => router.push(ROUTE_SETTINGS)}
+          // onPress={async () => {
+          //   const response = await callRefreshToken();
+          //   console.log(response.data);
+          // }}
           cooldown={1000}
         >
           <Cog size={24} color={Colors.text} />
@@ -44,19 +58,15 @@ export default function New() {
         <View className="flex-1 ">
           <GradientMask intensity={5}>
             <ScrollView className="flex-1 px-6 pt-6">
-              {documentTypes?.items &&
-                documentTypes?.items.map((type, index) => (
+              {documentTypes &&
+                documentTypes.map((type, index) => (
                   <Pressable
                     key={index}
                     onPress={async () => {
                       try {
-                        const data = await queryClient.fetchQuery({
-                          queryKey: ["createDocument", type.id],
-                          queryFn: () => callCreateDocument(type.id),
-                        });
-                        router.push({
-                          pathname: ROUTE_TEMPLATE,
-                          params: { id: data.id, name: `New ${type.name}` },
+                        newDocumentMutation.mutate({
+                          documentTypeId: type._id,
+                          newDocumentNamePlaceholder: `New ${type.name}`,
                         });
                       } catch (error) {
                         console.error("Error creating document:", error);
@@ -70,7 +80,7 @@ export default function New() {
                           {type.name}
                         </Text>
                         <Text light twClass="text-base mt-2">
-                          {type.description}
+                          {type.description || "No description"}
                         </Text>
                       </View>
                       <View className="flex justify-center ml-3">

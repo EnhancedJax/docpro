@@ -1,56 +1,24 @@
-import { useQueryClient } from "@tanstack/react-query";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
-import { callGetMe } from "../api/user";
-import { ROUTE_HOME, ROUTE_LIST, ROUTE_LOGIN } from "../constants/routes";
-import { useAuth } from "../providers/auth";
+import Loader from "../components/loader";
+import { ACCESS_TOKEN_KEY } from "../constants";
+import { ROUTE_HOME, ROUTE_LOGIN } from "../constants/routes";
 
 export default function Index() {
-  const { accessToken } = useAuth();
-  const [authState, setAuthState] = useState({
-    hasDocuments: false,
-    isLoading: true,
-  });
-  const queryClient = useQueryClient();
+  const [redirectTo, setRedirectTo] = useState(null);
 
   useEffect(() => {
-    const init = async () => {
-      try {
-        const meData = await queryClient.fetchQuery({
-          queryKey: ["me"],
-          queryFn: callGetMe,
-        });
-
-        setAuthState({
-          isLoading: false,
-          hasDocuments: meData?.documents.count > 0,
-        });
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-        setAuthState({ isLoading: false, hasDocuments: false });
-      } finally {
-      }
-    };
-
-    if (accessToken === 0) return;
-    if (accessToken) {
-      init();
-    } else {
-      setAuthState({ isLoading: false, hasDocuments: false });
+    async function checkAccessToken() {
+      const accessToken = await AsyncStorage.getItem(ACCESS_TOKEN_KEY);
+      setRedirectTo(accessToken ? ROUTE_HOME : ROUTE_LOGIN);
     }
-  }, [accessToken]);
+    checkAccessToken();
+  }, []);
 
-  if (authState.isLoading) {
-    return null;
+  if (redirectTo === null) {
+    return <Loader visible />;
   }
 
-  if (!accessToken) {
-    return <Redirect href={ROUTE_LOGIN} />;
-  }
-
-  if (authState.hasDocuments) {
-    return <Redirect href={ROUTE_LIST} />;
-  }
-
-  return <Redirect href={ROUTE_HOME} />;
+  return <Redirect href={redirectTo} />;
 }

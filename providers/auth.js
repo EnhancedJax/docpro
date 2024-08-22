@@ -1,111 +1,105 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { createContext, useContext, useEffect, useRef, useState } from "react";
-import { api } from "../api";
-import {
-  callLoginUser,
-  callLogoutUser,
-  callRefreshToken,
-  callSignupUser,
-} from "../api/auth";
-import { ACCESS_TOKEN_TIMEOUT, REFRESH_TOKEN_KEY } from "../constants";
+import { useMutation } from "@tanstack/react-query";
+import { router } from "expo-router";
+import { createContext, useContext } from "react";
+import { callLoginUser, callLogoutUser, callSignupUser } from "../api/auth";
+import { useToast } from "../components/toast";
+import { ROUTE_ENTRY, ROUTE_HOME } from "../constants/routes";
+import { newSession, removeSession } from "../utils/session";
 
 const AuthContext = createContext(null);
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
-  const queryClient = useQueryClient();
-  const refreshTimerRef = useRef(null);
-  const [accessToken, setAccessToken] = useState(0); // 0 means not set yet (null means no access token)
+  const { showToast } = useToast();
+
+  //#region Mutations
 
   const loginMutation = useMutation({
     mutationFn: callLoginUser,
-    onMutate: () => {
-      setAccessToken(0);
+    retry: false,
+    onError: (error) => {
+      if (error.response?.status === 401) {
+        showToast({
+          message: "Invalid credentials",
+          type: "error",
+        });
+      }
     },
-    onSuccess: async (data) => {
-      setAccessToken(data.accessToken);
-      await AsyncStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
-      scheduleTokenRefresh();
+    onSuccess: async (response, { successCallback }) => {
+      const accessToken = response.data.accessToken;
+      const refreshToken = response.data.refreshToken;
+      newSession(accessToken, refreshToken);
+      router.replace(ROUTE_ENTRY);
+      successCallback();
     },
   });
 
   const signupMutation = useMutation({
     mutationFn: callSignupUser,
-    onMutate: () => {
-      setAccessToken(0);
-    },
-    onSuccess: async (data) => {
-      setAccessToken(data.accessToken);
-      await AsyncStorage.setItem(REFRESH_TOKEN_KEY, data.refreshToken);
-      scheduleTokenRefresh();
+    retry: false,
+    onSuccess: async (response, { successCallback }) => {
+      const accessToken = response?.data?.accessToken;
+      const refreshToken = response?.data?.refreshToken;
+      newSession(accessToken, refreshToken);
+      router.replace(ROUTE_HOME);
+      successCallback();
     },
   });
 
   const logoutMutation = useMutation({
     mutationFn: callLogoutUser,
-    onSuccess: async () => {
-      setAccessToken(null);
-      await AsyncStorage.removeItem(REFRESH_TOKEN_KEY);
-      clearTimeout(refreshTimerRef.current);
-      api.defaults.headers.common["Authorization"] = "";
+    onSettled: async () => {
+      removeSession();
     },
-  });
-
-  const refreshMutation = useMutation({
-    mutationFn: callRefreshToken,
-    onSuccess: (data) => {
-      setAccessToken(data.accessToken);
-      scheduleTokenRefresh();
+    onSuccess: async (data, { successCallback }) => {
+      successCallback();
     },
     onError: () => {
-      // If refresh fails, log out the user
-      logout();
+      router.replace(ROUTE_HOME);
+      showToast({
+        message: "Please sign in again",
+        type: "error",
+      });
     },
   });
 
-  const login = (credentials) => loginMutation.mutate(credentials);
-  const signup = (userData) => signupMutation.mutate(userData);
-  const logout = () => logoutMutation.mutate();
+  //#region Functions
 
-  const scheduleTokenRefresh = () => {
-    clearTimeout(refreshTimerRef.current);
-    refreshTimerRef.current = setTimeout(() => {
-      refreshMutation.mutate();
-    }, ACCESS_TOKEN_TIMEOUT - 5000); // Refresh 5 seconds before expiration
-  };
+  const login = (credentials, successCallback) =>
+    loginMutation.mutate({ credentials, successCallback });
+  const signup = (userData, successCallback) =>
+    signupMutation.mutate({ userData, successCallback });
+  const logout = (successCallback) =>
+    logoutMutation.mutate({ successCallback });
+  // const refreshToken = (refreshToken) =>
+  //   refreshMutation.mutate({ refreshToken });
 
-  const manualRefresh = () => {
-    return refreshMutation.mutateAsync();
-  };
+  //#region useEffects
 
-  useEffect(() => {
-    const initAuth = async () => {
-      const storedRefreshToken = await AsyncStorage.getItem(REFRESH_TOKEN_KEY);
-      if (storedRefreshToken) {
-        refreshMutation.mutate();
-      } else {
-        setAccessToken(null);
-      }
-    };
-    initAuth();
-    return () => clearTimeout(refreshTimerRef.current);
-  }, []);
-
-  useEffect(() => {
-    if (accessToken) {
-      api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
-    } else {
-      delete api.defaults.headers.common["Authorization"];
-    }
-  }, [accessToken]);
+  // useEffect(() => {
+  //   const initAuth = async () => {
+  //     const storedRefreshToken = await AsyncStorage.getItem(REFRESH_TOKEN_KEY);
+  //     if (storedRefreshToken) {
+  //       const decodedRefreshToken = jwtDecode(storedRefreshToken);
+  //       const expiresAt = new Date(decodedRefreshToken.exp * 1000);
+  //       console.log("storedRefreshToken", storedRefreshToken);
+  //       console.log("expiresAt", expiresAt);
+  //       if (expiresAt > new Date()) {
+  //         console.log("--> Refreshing token");
+  //         refreshToken(storedRefreshToken);
+  //       } else {
+  //         removeSession();
+  //       }
+  //     }
+  //     removeSession(); // cleanup
+  //   };
+  //   initAuth();
+  // }, []);
 
   const value = {
-    accessToken,
     login,
     signup,
     logout,
-    refreshToken: manualRefresh,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

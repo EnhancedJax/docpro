@@ -51,25 +51,21 @@ export default function QuestionCard({
                 {Platform.OS === "ios" ? (
                   <DateTimePicker
                     value={
-                      value instanceof Date
-                        ? value
-                        : value !== undefined
+                      value && /^\d{4}-\d{2}-\d{2}$/.test(value)
                         ? new Date(value)
                         : new Date()
                     }
                     mode="date"
                     display="spinner"
                     onChange={(event, selectedDate) => {
-                      onChange(selectedDate);
+                      onChange(selectedDate.toISOString().split("T")[0]);
                     }}
                   />
                 ) : (
                   <Pressable onPress={() => setShowDatePicker(true)}>
                     <View className="flex-row items-center justify-center py-4 rounded-full bg-gray">
                       <Text medium twClass="text-lg">
-                        {value && value instanceof Date
-                          ? value.toDateString()
-                          : "Select Date"}
+                        {value || "Select Date"}
                       </Text>
                     </View>
                   </Pressable>
@@ -77,9 +73,7 @@ export default function QuestionCard({
                 {Platform.OS !== "ios" && showDatePicker && (
                   <DateTimePicker
                     value={
-                      value instanceof Date
-                        ? value
-                        : value !== undefined
+                      value && /^\d{4}-\d{2}-\d{2}$/.test(value)
                         ? new Date(value)
                         : new Date()
                     }
@@ -88,7 +82,7 @@ export default function QuestionCard({
                     onChange={(event, selectedDate) => {
                       setShowDatePicker(false);
                       if (selectedDate) {
-                        onChange(selectedDate);
+                        onChange(selectedDate.toISOString().split("T")[0]);
                       }
                     }}
                   />

@@ -25,7 +25,7 @@ function Edit() {
         <QuestionCard
           className="justify-center"
           question={FIELDS[index] || EMAIL_FIELD}
-          index={0}
+          index={FIELDS[index].key}
           control={control}
           errors={errors}
         >
@@ -55,7 +55,7 @@ function Edit() {
               control={control}
               name="oldPassword"
               placeholder="Old password"
-              textContentType="oneTimeCode" // fix ios issue
+              type="password"
             />
             <FieldError error={errors.oldPassword} />
             <Input

@@ -9,16 +9,20 @@ export const emailSchema = (value) =>
       .notOneOf([value], "New email must be different from the current one"),
   });
 
-export const requiredSchema = yup.object({
-  0: yup.string().required(`This field is required`),
-});
-
 export const passwordSchema = yup.object({
   oldPassword: yup.string().required(`This field is required`),
   newPassword: yup
     .string()
     .required(`This field is required`)
-    .min(8, "Password must be at least 8 characters"),
+    .matches(
+      /^(?=.*\d)(?=.*[-_!@#$%^&*])(?=.*[a-z])(?=.*[A-Z]).{8,16}$/,
+      "Password must contain at least 1 uppercase, 1 lowercase, 1 special character, and be 8-16 characters long"
+    )
+    .min(8, "Password must be at least 8 characters")
+    .notOneOf(
+      [yup.ref("oldPassword")],
+      "New password must be different from the old password"
+    ),
   confirmPassword: yup
     .string()
     .required(`This field is required`)

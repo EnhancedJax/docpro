@@ -6,7 +6,6 @@ import ButtonedScrollView from "../components/ButtonedScrollView";
 import Input from "../components/Input";
 import Pressable from "../components/Pressable";
 import Text from "../components/Text";
-import Loader from "../components/loader";
 import Colors from "../constants/color";
 
 export default function FilterView({ filter, setFilter }) {
@@ -16,7 +15,7 @@ export default function FilterView({ filter, setFilter }) {
   });
 
   if (!isFetched) {
-    return <Loader />;
+    return null;
   }
 
   return (
@@ -45,24 +44,24 @@ export default function FilterView({ filter, setFilter }) {
         </Pressable>
       </View>
       <ButtonedScrollView arrowOffset={-24}>
-        {documentTypes?.items &&
-          documentTypes?.items?.map((type, index) => (
+        {documentTypes &&
+          documentTypes?.map((type, index) => (
             <Pressable
               key={`${type.name}-${index}`}
               className={`px-4 py-3 mr-2 bg-gray rounded-full ${
-                index === filter.type ? "bg-secondary10" : ""
+                type._id === filter.type ? "bg-secondary10" : ""
               }`}
               onPress={() => {
-                if (index === filter.type) {
+                if (type._id === filter.type) {
                   setFilter({ ...filter, type: null });
                 } else {
-                  setFilter({ ...filter, type: index });
+                  setFilter({ ...filter, type: type._id });
                 }
               }}
             >
               <Text
                 twClass={`text-tgray ${
-                  index === filter.type ? "text-secondary" : ""
+                  type._id === filter.type ? "text-secondary" : ""
                 }`}
               >
                 {type.name}

@@ -1,7 +1,14 @@
 import { CheckCircle, Info, XCircle } from "lucide-react-native";
-import React, { createContext, useContext, useEffect, useState } from "react";
-import { View } from "react-native";
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { Platform, View } from "react-native";
 import Animated, {
+  cancelAnimation,
   Easing,
   useAnimatedStyle,
   useSharedValue,
@@ -23,15 +30,22 @@ export const ToastProvider = ({ children }) => {
     message: "",
     type: "info",
   });
+  const timerRef = useRef(null);
 
   const showToast = ({ message, type = "info" }) => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
     setToast({ visible: true, message, type });
-    setTimeout(() => {
+    timerRef.current = setTimeout(() => {
       setToast((prev) => ({ ...prev, visible: false }));
     }, DEFAULT_TOAST_DURATION);
   };
 
   const hideToast = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+    }
     setToast((prev) => ({ ...prev, visible: false }));
   };
 
@@ -72,14 +86,17 @@ const Toast = ({ visible, message, type, onPress }) => {
 
   useEffect(() => {
     if (visible) {
+      cancelAnimation(progress);
+      progress.value = 0;
       progress.value = withTiming(1, {
         duration: DEFAULT_TOAST_DURATION,
         easing: Easing.linear,
       });
     } else {
+      cancelAnimation(progress);
       progress.value = 0;
     }
-  }, [visible]);
+  }, [visible, message]);
 
   const getIcon = () => {
     switch (type) {
@@ -102,8 +119,12 @@ const Toast = ({ visible, message, type, onPress }) => {
       ]}
       className="absolute left-4 right-4 "
     >
-      <Pressable className="shadow-lg " onPress={onPress}>
-        <View className="relative bg-white rounded-lg">
+      <Pressable onPress={onPress}>
+        <View
+          className={`relative bg-white rounded-lg ${
+            Platform.OS === "ios" ? "shadow-lg" : "border border-neutral-200"
+          }`}
+        >
           <View className="flex-row items-center p-4">
             <View className="mr-3">{getIcon()}</View>
             <Text className="text-gray-800">{message}</Text>

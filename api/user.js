@@ -1,86 +1,46 @@
-export const callGetMe = async () => {
-  // Simulating API call with a timeout
-  await new Promise((resolve) => setTimeout(resolve, 100));
+import { api } from "./index";
 
-  // Dummy response
-  const response = {
-    id: "123",
-    email: "test@test.com",
-    name: "hs",
-    gender: "Male",
-    dob: "1990-01-01",
+export const callGetMe = async () => {
+  console.log("callGetMe");
+  const { data: responseData } = await api.get(`/user`);
+  const { data } = responseData;
+  const info = data.info;
+  const { editable, completed, paid } = data.userDocs;
+  const items = [...editable, ...completed, ...paid];
+  const result = {
+    email: data?.email || "",
+    name: data?.info?.name || "",
+    gender: data?.info?.gender || "Male",
+    dob: data?.info?.dob || "",
     documents: {
-      count: 6,
-      unpaid: 2,
-      items: [
-        {
-          id: "1",
-          title: "Document 1",
-          type: 2,
-          date: new Date(new Date().setDate(new Date().getDate() - 1)),
-          status: 2,
+      count: items.length || 0,
+      unpaid: completed.length || 0,
+      items: items.map((item) => ({
+        id: item._id,
+        title: item.docName,
+        type: {
+          id: item.DocTypeId,
+          name: item.DocType,
         },
-        {
-          id: "2",
-          title: "Document 2",
-          type: 0,
-          date: new Date(new Date().setDate(new Date().getDate() - 2)),
-          status: 1,
-        },
-        {
-          id: "3",
-          title: "Document 3",
-          type: 1,
-          date: new Date(),
-          status: 0,
-        },
-        {
-          id: "4",
-          title: "Document 4",
-          type: 1,
-          date: new Date(),
-          status: 0,
-        },
-        {
-          id: "5",
-          title: "Document 5",
-          type: 1,
-          date: new Date(),
-          status: 0,
-        },
-        {
-          id: "6",
-          title: "Document 6",
-          type: 1,
-          date: new Date(),
-          status: 0,
-        },
-      ],
+        date: item.editedAt,
+        status: editable.includes(item) ? 0 : completed.includes(item) ? 1 : 2,
+      })),
     },
   };
-
-  if (response.id) {
-    return response;
-  }
-  throw new Error("An error has occurred");
+  return result;
 };
 
-export const callUpdateMe = async () => {
-  // Simulating API call with a timeout
-  await new Promise((resolve) => setTimeout(resolve, 100));
-
-  // Dummy response
-  return true;
+export const callUpdateMe = async ({ key, value }) => {
+  console.log("callUpdateMe", key, value);
+  const response = await api.patch(`/user`, {
+    payload: { [key]: value },
+  });
+  return response;
 };
 
-export const callUpdatePassword = async () => {
-  // Simulating API call with a timeout
-  await new Promise((resolve) => setTimeout(resolve, 100));
-
-  // Dummy response
-  throw new Error("Password does not match");
+export const callUpdatePassword = async ({ oldPassword, newPassword }) => {
+  console.log("callEditPassword", oldPassword, newPassword);
+  return await api.post("/user/forgetPassword", {
+    payload: { currentPassword: oldPassword, newPassword: newPassword },
+  });
 };
-
-// export const callGetMe = () => api.get(`/user`);
-// export const callUpdateMe = (key, value) => api.patch(`/user`, { [key]: value });
-// export const callUpdatePassword = (newPassword, oldPassword) => api.post(`/user/editPassword`, { newPassword, oldPassword });

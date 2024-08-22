@@ -1,7 +1,7 @@
-import * as Haptics from "expo-haptics";
 import React, { useEffect, useRef } from "react";
 import {
   Dimensions,
+  Platform,
   Pressable as RNPressable,
   StyleSheet,
   View,
@@ -58,7 +58,7 @@ const AnimatedCard = ({ index, scrollX, children }) => {
   return (
     <RNPressable style={cardSizeStyle}>
       <Animated.View
-        style={[animatedStyle]}
+        style={Platform.OS === "ios" ? animatedStyle : {}}
         className="items-center justify-center flex-1 bg-white shadow-md rounded-3xl"
       >
         <View className="flex-1 w-full">{children}</View>
@@ -89,16 +89,16 @@ export default function CardCarousel({
     },
   });
 
-  useEffect(() => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  }, [activeIndex]);
+  const scrollToIndex = (index) => {
+    ref.current.scrollTo({
+      x: index * (CARD_WIDTH + MARGIN_FOR_CARD),
+    });
+    onFinishGo();
+  };
 
   useEffect(() => {
     if (goToIndex !== null) {
-      ref.current.scrollTo({
-        x: goToIndex * (CARD_WIDTH + MARGIN_FOR_CARD),
-      });
-      onFinishGo();
+      scrollToIndex(goToIndex);
     }
   }, [goToIndex]);
 

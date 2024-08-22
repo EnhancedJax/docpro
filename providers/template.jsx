@@ -1,23 +1,25 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { StackActions } from "@react-navigation/native";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   router,
   useLocalSearchParams,
   useNavigation,
   useNavigationContainerRef,
 } from "expo-router";
+import { Loader } from "lucide-react-native";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
+import { Alert } from "react-native";
 import * as yup from "yup";
 import {
+  callDeleteDocument,
   callGetDocument,
-  callGetDocumentQuestions,
   callUpdateDocument,
 } from "../api/document";
 import { useLoader } from "../components/loader";
 import { useToast } from "../components/toast";
-import { ROUTE_LIST } from "../constants/routes";
+import { ROUTE_HOME, ROUTE_LIST } from "../constants/routes";
 import { generateSchema } from "../utils/template";
 
 const TemplateContext = createContext();
@@ -37,7 +39,9 @@ function TemplateProvider({ children }) {
   });
   const { watch, getValues, reset } = form;
   const rootNavigation = useNavigationContainerRef();
+  const queryClient = useQueryClient();
   const [questionItem, setQuestionItem] = useState(null);
+  const [goToIndex, setGoToIndex] = useState(null);
 
   //#region Helpers
 
@@ -48,54 +52,68 @@ function TemplateProvider({ children }) {
   };
 
   //#region APIs
-  const { data: documentData } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["document", id],
     queryFn: () => callGetDocument(id),
-  });
-  const fetchedDocumentData = documentData?.type !== undefined;
-  const { data: questionsData, isSuccess } = useQuery({
-    queryKey: ["documentQuestions", documentData?.type],
-    queryFn: () => callGetDocumentQuestions(documentData?.type),
-    enabled: fetchedDocumentData,
+    staleTime: 0,
   });
 
   useEffect(() => {
-    showLoader();
-    if (questionsData) {
+    if (data) {
       // adds the name to the first question
-      questionsData.items.unshift({
+      const questions = data.questions;
+      questions.unshift({
         question: "Give your document a name",
         type: "text",
         placeholder: defaultName,
         min: 1,
         max: 40,
       });
-      setQuestionItem(questionsData.items);
-      setSchema(generateSchema(questionsData.items));
+      setQuestionItem(questions);
+      setSchema(generateSchema(questions));
 
       // document answers is an array of arrays. How
-      const documentName = documentData?.name;
-      const documentAnswers = documentData?.data.reduce(
-        (acc, answer, index) => {
-          acc[index + 1] = answer;
-          return acc;
-        },
-        {}
-      );
+      const documentName = data?.name;
+      const documentAnswers = data?.answers.reduce((acc, answer, index) => {
+        acc[index + 1] = answer;
+        return acc;
+      }, {});
       documentAnswers["0"] = documentName;
       reset(documentAnswers);
-      setProgress(Object.keys(documentAnswers).length - 1);
-      hideLoader();
+      const answerLength = Object.keys(documentAnswers).length;
+      const lastAnswer = documentAnswers[(answerLength - 1).toString()];
+      const progress = answerLength - (lastAnswer ? 0 : 1);
+      setProgress(progress);
+      setTimeout(() => {
+        setGoToIndex(progress);
+      }, 500);
     }
-  }, [questionsData]);
+  }, [data]);
 
   const updateMutation = useMutation({
     mutationFn: ({ name, data }) => callUpdateDocument(id, name, data),
+    onSuccess: async (response, { successCallback }) => {
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
+      successCallback();
+    },
+  });
+
+  const deleteMutation = useMutation({
+    mutationFn: () => callDeleteDocument(id),
+    onSuccess: async (response, { isBeforeRemove }) => {
+      await queryClient.invalidateQueries({ queryKey: ["me"] });
+      if (!isBeforeRemove) {
+        popNavigation();
+      }
+      router.replace({
+        pathname: ROUTE_HOME,
+      });
+    },
   });
 
   //#region Callbacks
 
-  const submit = async (finished = false) => {
+  const submit = async (callback) => {
     const data = getValues();
     const name = data["0"];
     // remove the name from the data, and turn into array of arrays
@@ -105,51 +123,74 @@ function TemplateProvider({ children }) {
       }
       return acc;
     }, []);
-    try {
-      showLoader();
-      await updateMutation.mutateAsync({ name, data: formattedData });
-    } catch (error) {
-      console.log(error);
-    } finally {
-      hideLoader();
-    }
+    updateMutation.mutate({
+      name,
+      data: formattedData,
+      successCallback: callback,
+    });
   };
 
-  const handleSaveAsDraft = async () => {
+  const handleSaveAsDraft = async (isBeforeRemove = false) => {
     setPrematureHandledRemove(true);
-    await submit(false);
-    showToast({
-      message: "Saved as draft!",
-      type: "success",
-    });
-    popNavigation();
-    router.replace({
-      pathname: ROUTE_LIST,
-      params: {
-        finished: false,
-        tab: "drafts",
-      },
+    const data = getValues();
+    const name = data["0"];
+    if (!name) {
+      showToast({
+        message: "Draft discarded",
+      });
+      deleteMutation.mutate(isBeforeRemove);
+      return;
+    }
+
+    await submit(() => {
+      showToast({
+        message: "Saved draft!",
+        type: "success",
+      });
+      if (!isBeforeRemove) {
+        popNavigation();
+      }
+      router.replace({
+        pathname: ROUTE_LIST,
+        params: {
+          finished: false,
+        },
+      });
     });
   };
 
   const handleSaveAndPay = async () => {
-    setPrematureHandledRemove(true);
-    await submit(true);
-    showToast({
-      message: "Saved!",
-      type: "success",
-    });
-    popNavigation();
-    router.replace({
-      pathname: ROUTE_LIST,
-      params: {
-        finished: true,
-        finishedId: id,
-        tab: "finished",
-      },
-    });
+    Alert.alert(
+      "Save and pay",
+      "You will be redirected to the payment page. You cannot edit the document after this.",
+      [
+        {
+          text: "Save and pay",
+          onPress: () => {
+            setPrematureHandledRemove(true);
+            submit(() => {
+              showToast({
+                message: "Saved!",
+                type: "success",
+              });
+              popNavigation();
+              router.replace({
+                pathname: ROUTE_LIST,
+                params: {
+                  finished: true,
+                  finishedId: id,
+                },
+              });
+            });
+          },
+        },
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+      ]
+    );
   };
-
   //#region UseEffects
 
   useEffect(() => {
@@ -175,18 +216,14 @@ function TemplateProvider({ children }) {
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (e) => {
       if (prematureHandledRemove) return;
-      handleSaveAsDraft();
+      handleSaveAsDraft(true);
     });
 
     return unsubscribe;
   }, [navigation, prematureHandledRemove]);
 
-  useEffect(() => {
-    console.log("New", id, defaultName);
-  }, []);
-
-  if (!fetchedDocumentData || !isSuccess || !questionItem) {
-    return null;
+  if (isLoading || !questionItem) {
+    return <Loader visible />;
   }
 
   return (
@@ -199,6 +236,8 @@ function TemplateProvider({ children }) {
         progress,
         setProgress,
         showToast,
+        goToIndex,
+        setGoToIndex,
       }}
     >
       {children}

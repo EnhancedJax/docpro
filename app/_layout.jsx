@@ -14,7 +14,6 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import {
   Keyboard,
-  KeyboardAvoidingView,
   Platform,
   SafeAreaView,
   StatusBar,
@@ -45,6 +44,9 @@ export default function RootLayout() {
   }
 
   SplashScreen.hideAsync();
+  if (Platform.OS === "android") {
+    NavigationBar.setBackgroundColorAsync("transparent");
+  }
   if (Platform.OS === "android") {
     NavigationBar.setBackgroundColorAsync("transparent");
   }

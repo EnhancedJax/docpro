@@ -90,7 +90,9 @@ export default function SwipeListItem({ item }) {
           )}
           <View className="mb-3">
             <Text twClass="text-base">{item.title}</Text>
-            <Text twClass="text-tgray text-sm">{item.type}</Text>
+            <Text twClass="text-tgray text-sm">
+              {item.type.name || "No type"}
+            </Text>
           </View>
           <View className="flex flex-row items-center">
             <Clock size={16} color={Colors.tgray} />

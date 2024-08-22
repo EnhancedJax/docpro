@@ -1,75 +1,27 @@
-import { StackActions } from "@react-navigation/native";
-import {
-  router,
-  useLocalSearchParams,
-  useNavigationContainerRef,
-} from "expo-router";
-import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
-import { Keyboard, View } from "react-native";
+import React from "react";
+import { View } from "react-native";
 import Button from "../components/Button";
 import CardCarousel from "../components/CardCarousel";
 import PageDots from "../components/PageDots";
 import QuestionCard from "../components/QuestionCard";
-import { useToast } from "../components/toast";
-import { ROUTE_HOME } from "../constants/routes";
 import { FIELDS } from "../constants/user";
-import useKeyboard from "../hooks/useKeyboard";
-import { useAuth } from "../providers/auth";
+import { useSignup, withSignupProvider } from "../providers/signup";
 
-export default function Index() {
-  const { signup } = useAuth();
-  const { showToast } = useToast();
-  const { email, password } = useLocalSearchParams();
-  const [progress, setProgress] = useState(0);
-  const [goToIndex, setGoToIndex] = useState(null);
+function Signup() {
   const {
     control,
     handleSubmit,
-    formState: { isValid, errors },
-  } = useForm({
-    defaultValues: FIELDS.reduce((acc, field, index) => {
-      acc[index] = undefined;
-      return acc;
-    }, {}),
-  });
-  const rootNavigation = useNavigationContainerRef();
-  const { isKeyboardOpen } = useKeyboard();
-  useEffect(() => {
-    Keyboard.dismiss();
-  }, [progress]);
-
-  const popNavigation = () => {
-    console.log(rootNavigation.canGoBack());
-    if (rootNavigation?.canGoBack()) {
-      rootNavigation.dispatch(StackActions.popToTop());
-    }
-  };
-
-  const onInvalid = () => {
-    setGoToIndex(0);
-    showToast({
-      message: "Please answer all questions.",
-      type: "error",
-    });
-  };
-
-  const onSubmit = async (data) => {
-    const signupData = { ...data, email, password };
-    console.log(signupData);
-    Keyboard.dismiss();
-    await signup(signupData);
-    showToast({
-      message: "Successfully signed up and logged in!",
-      type: "success",
-    });
-    popNavigation();
-    router.replace(ROUTE_HOME);
-  };
-
-  const handlePrevious = () => {
-    router.back();
-  };
+    isValid,
+    errors,
+    onInvalid,
+    onSubmit,
+    handlePrevious,
+    progress,
+    setProgress,
+    goToIndex,
+    setGoToIndex,
+    isKeyboardOpen,
+  } = useSignup();
 
   return (
     <View className="flex-col flex-1 border-t border-b border-neutral-300">
@@ -87,7 +39,7 @@ export default function Index() {
               isValid || progress !== FIELDS.length - 1 ? "primary" : "inactive"
             }
             onPress={
-              isValid || progress === FIELDS.length - 1
+              progress === FIELDS.length - 1
                 ? handleSubmit(onSubmit, onInvalid)
                 : () => setGoToIndex(progress + 1)
             }
@@ -106,10 +58,11 @@ export default function Index() {
         {FIELDS.map((question, index) => (
           <QuestionCard
             key={`Question${index}`}
-            index={index}
+            index={question.key}
             question={question}
             control={control}
             errors={errors}
+            useRequiredValidator={false}
           />
         ))}
       </CardCarousel>
@@ -123,3 +76,5 @@ export default function Index() {
     </View>
   );
 }
+
+export default withSignupProvider(Signup);

@@ -9,7 +9,6 @@ import { useTemplate, withTemplateProvider } from "../../providers/template";
 
 function Template() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [goToIndex, setGoToIndex] = useState(null);
   const {
     questionItem,
     handleSaveAsDraft,
@@ -17,6 +16,8 @@ function Template() {
     form,
     progress,
     showToast,
+    goToIndex,
+    setGoToIndex,
   } = useTemplate();
   const {
     control,
@@ -33,7 +34,17 @@ function Template() {
       <View className={`flex-row p-6 ${isKeyboardOpen ? "hidden" : ""}`}>
         <Button
           type="secondary"
-          onPress={handleSaveAsDraft}
+          onPress={
+            Object.keys(errors).length > 0
+              ? () => {
+                  showToast({
+                    message: "Please make sure there are no errors.",
+                    type: "info",
+                  });
+                  setGoToIndex(parseInt(Object.keys(errors)[0]));
+                }
+              : handleSaveAsDraft
+          }
           className="flex-1 mr-2"
         >
           Save Draft
@@ -72,7 +83,7 @@ function Template() {
           allowAction
           className="flex-1 ml-2"
         >
-          {activeIndex === questionItem.length - 1 ? "Finish" : "Next"}
+          {activeIndex === questionItem.length - 1 ? "Save & pay" : "Next"}
         </Button>
       </View>
       <CardCarousel

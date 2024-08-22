@@ -2,8 +2,10 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { router } from "expo-router";
 import { createContext, useContext, useState } from "react";
 import { useForm } from "react-hook-form";
+import { Keyboard } from "react-native";
+import { callCheckEmail } from "../api/auth";
 import { useToast } from "../components/toast";
-import { ROUTE_ENTRY, ROUTE_SIGNUP } from "../constants/routes";
+import { ROUTE_SIGNUP } from "../constants/routes";
 import { useAuth } from "../providers/auth";
 import { schema } from "../schema/login";
 
@@ -19,31 +21,47 @@ function LoginProvider({ children }) {
     formState: { errors },
   } = useForm({
     defaultValues: {
-      email: "",
-      password: "",
-      confirmPassword: "",
+      email: "user@gmail.com",
+      password: "Qqq-12345",
+      confirmPassword: "Qqq-12345",
     },
     resolver: yupResolver(schema(currentScreen === "signup")),
   });
   const { login } = useAuth();
 
-  const handleSignup = (data) => {
-    router.push({
-      pathname: ROUTE_SIGNUP,
-      params: {
-        email: data.email,
-        password: data.password,
-      },
-    });
+  const handleSignup = async (data) => {
+    try {
+      Keyboard.dismiss();
+      await callCheckEmail({ email: data.email });
+      router.push({
+        pathname: ROUTE_SIGNUP,
+        params: {
+          email: data.email,
+          password: data.password,
+        },
+      });
+    } catch (error) {
+      const status = error.response.status;
+      if (status === 409 || status === 400) {
+        showToast({
+          message: "Email already exists",
+          type: "error",
+        });
+      }
+    }
   };
 
-  const handleLogin = async (data) => {
-    await login(data);
-    showToast({
-      message: "Login successful!",
-      type: "success",
+  const handleLogin = (data) => {
+    const credentials = {
+      email: data.email,
+      password: data.password,
+    };
+    login(credentials, () => {
+      showToast({
+        message: "Login successful!",
+        type: "success",
+      });
     });
-    router.replace(ROUTE_ENTRY);
   };
 
   return (
