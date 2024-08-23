@@ -20,11 +20,11 @@ function LoginProvider({ children }) {
     handleSubmit,
     formState: { errors },
   } = useForm({
-    defaultValues: {
-      email: "user@gmail.com",
-      password: "Qqq-12345",
-      confirmPassword: "Qqq-12345",
-    },
+    // defaultValues: {
+    //   email: "user@gmail.com",
+    //   password: "Qqq-12345",
+    //   confirmPassword: "Qqq-12345",
+    // },
     resolver: yupResolver(schema(currentScreen === "signup")),
   });
   const { login } = useAuth();
