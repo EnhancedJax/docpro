@@ -28,7 +28,7 @@ export const AuthProvider = ({ children }) => {
     onSuccess: async (response, { successCallback }) => {
       const accessToken = response.data.accessToken;
       const refreshToken = response.data.refreshToken;
-      newSession(accessToken, refreshToken);
+      await newSession(accessToken, refreshToken);
       router.replace(ROUTE_ENTRY);
       successCallback();
     },
@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
     onSuccess: async (response, { successCallback }) => {
       const accessToken = response?.data?.accessToken;
       const refreshToken = response?.data?.refreshToken;
-      newSession(accessToken, refreshToken);
+      await newSession(accessToken, refreshToken);
       router.replace(ROUTE_HOME);
       successCallback();
     },

@@ -9,7 +9,10 @@ export default function RootLayout() {
         name="template"
         options={{ presentation: "containedModal" }}
       />
-      <Stack.Screen name="view" options={{ presentation: "modal" }} />
+      <Stack.Screen
+        name="listen"
+        options={{ presentation: "containedModal" }}
+      />
     </Stack>
   );
 }

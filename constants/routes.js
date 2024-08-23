@@ -7,3 +7,4 @@ export const ROUTE_SETTINGS = "/(app)/settings";
 export const ROUTE_SETTINGS_EDIT = "/(app)/settings/edit";
 export const ROUTE_TEMPLATE = "/(app)/template";
 export const ROUTE_VIEW = "/(app)/view";
+export const ROUTE_LISTEN = "/(app)/listen";

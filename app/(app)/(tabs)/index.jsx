@@ -31,7 +31,7 @@ export default function New() {
   });
 
   if (!isFetched) {
-    return <Loader />;
+    return <Loader visible />;
   }
 
   return (
@@ -45,10 +45,6 @@ export default function New() {
         <Pressable
           className="p-4 rounded-full"
           onPress={() => router.push(ROUTE_SETTINGS)}
-          // onPress={async () => {
-          //   const response = await callRefreshToken();
-          //   console.log(response.data);
-          // }}
           cooldown={1000}
         >
           <Cog size={24} color={Colors.text} />

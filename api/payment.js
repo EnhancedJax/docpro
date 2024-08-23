@@ -1,15 +1,15 @@
-export const callNewPayment = async () => {
-  // Simulating API call with a timeout
-  await new Promise((resolve) => setTimeout(resolve, 100));
+import { api } from "./index";
 
-  // Dummy response
-  return {
-    data: {
-      paymentIntentClientSecret: "cs_00000",
-      customerEphemeralKeySecret: "ek_00000",
-      customerId: "cus_00000",
-    },
-  };
+export const callNewPayment = async (id) => {
+  console.log("callNewPayment");
+  const response = await api.post(`/payment/${id}`);
+  return response.data;
 };
 
-// export const callNewPayment = (documentId) => api.post("/payment", documentId);
+export const callPaymentStatus = async (paymentIntentId) => {
+  console.log("callPaymentStatus", paymentIntentId);
+  const response = await api.get(
+    `/payment/?paymentIntentId=${paymentIntentId}`
+  );
+  return response.data;
+};

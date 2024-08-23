@@ -2,7 +2,7 @@ import * as yup from "yup";
 
 export const emailSchema = (value) =>
   yup.object({
-    0: yup
+    email: yup
       .string()
       .email("Invalid email address")
       .required(`This field is required`)

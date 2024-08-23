@@ -1,4 +1,3 @@
-import { router } from "expo-router";
 import { View } from "react-native";
 import Button from "../../../components/Button";
 import FieldError from "../../../components/FieldError";
@@ -13,10 +12,12 @@ function Edit() {
     control,
     errors,
     handleSubmit,
+    handleCancel,
     onSubmit,
     onPasswordSubmit,
     isPassword,
     index,
+    key,
   } = useEdit();
 
   return (
@@ -25,7 +26,7 @@ function Edit() {
         <QuestionCard
           className="justify-center"
           question={FIELDS[index] || EMAIL_FIELD}
-          index={FIELDS[index].key}
+          index={key}
           control={control}
           errors={errors}
         >
@@ -38,7 +39,7 @@ function Edit() {
           </Button>
           <Button
             className="mt-2"
-            onPress={() => router.back()}
+            onPress={handleCancel}
             cooldown={1000}
             type="secondary"
           >
@@ -80,6 +81,14 @@ function Edit() {
               cooldown={1000}
             >
               Save
+            </Button>
+            <Button
+              className="mt-2"
+              onPress={handleCancel}
+              cooldown={1000}
+              type="secondary"
+            >
+              Cancel
             </Button>
           </View>
         </View>

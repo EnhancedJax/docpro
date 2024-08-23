@@ -1,15 +1,10 @@
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  router,
-  useLocalSearchParams,
-  useNavigation,
-  useNavigationContainerRef,
-} from "expo-router";
+import { router, useLocalSearchParams, useNavigation } from "expo-router";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Keyboard } from "react-native";
-import { callUpdateMe, callUpdatePassword } from "../api/user";
+import { callUpdateEmail, callUpdateMe, callUpdatePassword } from "../api/user";
 import { useToast } from "../components/toast";
 import { ROUTE_LOGIN } from "../constants/routes";
 import { FIELDS } from "../constants/user";
@@ -28,6 +23,11 @@ function EditProvider({ children }) {
     () => isPasswordString === "true",
     [isPasswordString]
   );
+  const key = useMemo(() => {
+    if (index === "-1") return "email";
+    if (isPassword) return "password";
+    return FIELDS[index].key;
+  }, [index, isPassword]);
   const {
     control,
     formState: { errors },
@@ -36,30 +36,25 @@ function EditProvider({ children }) {
     resolver: yupResolver(
       isPassword
         ? passwordSchema
-        : index < 0
+        : key === "email"
         ? emailSchema(value)
         : generateSchema([FIELDS[index]])
     ),
     defaultValues: {
-      [index === "-1" ? "email" : !isPassword ? FIELDS[index].key : "0"]: value,
+      [key]: value,
     },
   });
   const navigation = useNavigation();
   const { showToast } = useToast();
   const queryClient = useQueryClient();
-  const rootNavigation = useNavigationContainerRef();
 
-  const popNavigation = () => {
-    if (rootNavigation?.canGoBack()) {
-      rootNavigation.dispatch(StackActions.popToTop());
-    }
-  };
+  //#region APIs
 
   const editUserMutation = useMutation({
-    retry: false,
     mutationFn: callUpdateMe,
     onSuccess: async () => {
       setSaved(true);
+      Keyboard.dismiss();
       showToast({
         message: "Changes saved",
         type: "success",
@@ -72,17 +67,47 @@ function EditProvider({ children }) {
     },
   });
 
-  const editPasswordMutation = useMutation({
+  const editEmailMutation = useMutation({
+    mutationFn: callUpdateEmail,
     retry: false,
-    mutationFn: callUpdatePassword,
     onSuccess: () => {
       setSaved(true);
       Keyboard.dismiss();
+      showToast({
+        message: "Email changed, please login again",
+        type: "success",
+      });
       logout(() => {
+        router.replace(ROUTE_LOGIN);
+      });
+    },
+    onError: (error) => {
+      const status = error.response?.status;
+      if (status === 409) {
         showToast({
-          message: "Password changed, please login again",
-          type: "success",
+          message: "User with this email already exists",
+          type: "error",
         });
+      } else {
+        showToast({
+          message: error?.response?.data?.message,
+          type: "error",
+        });
+      }
+    },
+  });
+
+  const editPasswordMutation = useMutation({
+    mutationFn: callUpdatePassword,
+    retry: false,
+    onSuccess: () => {
+      setSaved(true);
+      Keyboard.dismiss();
+      showToast({
+        message: "Password changed, please login again",
+        type: "success",
+      });
+      logout(() => {
         router.replace(ROUTE_LOGIN);
       });
     },
@@ -101,17 +126,34 @@ function EditProvider({ children }) {
     },
   });
 
+  //#region Callbacks
+
+  const handleCancel = () => {
+    Keyboard.dismiss();
+    setTimeout(() => {
+      router.back();
+    }, 100);
+  };
+
   const onSubmit = (data) => {
-    const key = index === "-1" ? "email" : FIELDS[index].key;
-    editUserMutation.mutate({
-      key,
-      value: data[key] instanceof Date ? data[key].toISOString() : data[key],
-    });
+    console.log(data);
+    if (key === "email") {
+      editEmailMutation.mutate({
+        newEmail: data[key],
+      });
+    } else {
+      editUserMutation.mutate({
+        key,
+        value: data[key] instanceof Date ? data[key].toISOString() : data[key],
+      });
+    }
   };
 
   const onPasswordSubmit = (data) => {
     editPasswordMutation.mutate(data);
   };
+
+  //#region useEffects
 
   useEffect(() => {
     const unsubscribe = navigation.addListener("beforeRemove", (e) => {
@@ -135,7 +177,9 @@ function EditProvider({ children }) {
         onSubmit,
         isPassword,
         index,
+        key,
         onPasswordSubmit,
+        handleCancel,
       }}
     >
       {children}

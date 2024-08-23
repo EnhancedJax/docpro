@@ -44,3 +44,10 @@ export const callUpdatePassword = async ({ oldPassword, newPassword }) => {
     payload: { currentPassword: oldPassword, newPassword: newPassword },
   });
 };
+
+export const callUpdateEmail = async ({ newEmail }) => {
+  console.log("callUpdateEmail", newEmail);
+  return await api.patch("/user/updateEmail", {
+    newEmail,
+  });
+};

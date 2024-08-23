@@ -1,21 +1,14 @@
-import { usePaymentSheet } from "@stripe/stripe-react-native";
-import { useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { Clock, HandCoins, StepForward } from "lucide-react-native";
 import { Platform, View } from "react-native";
-import { callNewPayment } from "../api/payment";
-import { useLoader } from "../components/loader";
-import Pressable from "../components/Pressable";
-import Text from "../components/Text";
-import { useToast } from "../components/toast";
-import Colors from "../constants/color";
-import { ROUTE_TEMPLATE } from "../constants/routes";
+import Pressable from "../../components/Pressable";
+import Text from "../../components/Text";
+import Colors from "../../constants/color";
+import { ROUTE_TEMPLATE } from "../../constants/routes";
+import { useList } from "../../providers/list";
 
 export default function SwipeListItem({ item }) {
-  const { initPaymentSheet, presentPaymentSheet } = usePaymentSheet();
-  const { showLoader, hideLoader } = useLoader();
-  const { showToast } = useToast();
-  const queryClient = useQueryClient();
+  const { newPayment, openPDFFile } = useList();
 
   return (
     <Pressable
@@ -30,43 +23,10 @@ export default function SwipeListItem({ item }) {
             router.push({ pathname: ROUTE_TEMPLATE, params: { id: item.id } });
             break;
           case 1: // PENDING PAYMENT
-            try {
-              showLoader();
-              const data = await queryClient.fetchQuery({
-                queryKey: ["newPayment", item.id],
-                queryFn: () => callNewPayment(item.id),
-              });
-
-              const { error } = await initPaymentSheet({
-                ...data?.data,
-                merchantDisplayName: "DocPro",
-                returnURL: "docpro://stripe-redirect",
-              });
-              if (error) throw new Error(error.message);
-              hideLoader();
-
-              await new Promise((resolve) => setTimeout(resolve, 1000));
-
-              const errors = await presentPaymentSheet();
-              if (errors) throw new Error(errors["error"]["message"]);
-            } catch (error) {
-              showToast({ message: error.message });
-              console.log(error.message);
-            } finally {
-              hideLoader();
-            }
+            newPayment(item.id);
             break;
           case 2: // COMPLETED
-            // const url = "https://pdfobject.com/pdf/sample.pdf";
-            // if (Platform.OS === "ios") {
-            //   WebBrowser.dismissBrowser();
-            //   WebBrowser.openBrowserAsync(url);
-            // } else {
-            //   IntentLauncher.startActivityAsync("android.intent.action.VIEW", {
-            //     type: "application/pdf",
-            //     data: url,
-            //   });
-            // }
+            openPDFFile(item.id);
             break;
         }
       }}
@@ -104,6 +64,16 @@ export default function SwipeListItem({ item }) {
 
                 if (diffInMinutes < 5) {
                   return "Just Now";
+                } else if (diffInMinutes < 60) {
+                  return `${Math.floor(diffInMinutes)} minutes ago`;
+                } else if (itemDate.getDate() === now.getDate()) {
+                  return (
+                    "Today at " +
+                    itemDate.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  );
                 } else if (itemDate.getDate() === now.getDate() - 1) {
                   return (
                     "Yesterday at " +

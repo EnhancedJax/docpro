@@ -55,7 +55,6 @@ function TemplateProvider({ children }) {
   const { data, isLoading } = useQuery({
     queryKey: ["document", id],
     queryFn: () => callGetDocument(id),
-    staleTime: 0,
   });
 
   useEffect(() => {
@@ -91,9 +90,11 @@ function TemplateProvider({ children }) {
   }, [data]);
 
   const updateMutation = useMutation({
-    mutationFn: ({ name, data }) => callUpdateDocument(id, name, data),
+    mutationFn: ({ name, data, isFinished }) =>
+      callUpdateDocument(id, name, data, isFinished),
     onSuccess: async (response, { successCallback }) => {
       await queryClient.invalidateQueries({ queryKey: ["me"] });
+      await queryClient.invalidateQueries({ queryKey: ["document", id] });
       successCallback();
     },
   });
@@ -113,7 +114,7 @@ function TemplateProvider({ children }) {
 
   //#region Callbacks
 
-  const submit = async (callback) => {
+  const submit = async (isFinished, callback) => {
     const data = getValues();
     const name = data["0"];
     // remove the name from the data, and turn into array of arrays
@@ -127,6 +128,7 @@ function TemplateProvider({ children }) {
       name,
       data: formattedData,
       successCallback: callback,
+      isFinished,
     });
   };
 
@@ -142,7 +144,7 @@ function TemplateProvider({ children }) {
       return;
     }
 
-    await submit(() => {
+    await submit(false, () => {
       showToast({
         message: "Saved draft!",
         type: "success",
@@ -153,7 +155,7 @@ function TemplateProvider({ children }) {
       router.replace({
         pathname: ROUTE_LIST,
         params: {
-          finished: false,
+          finished: "none",
         },
       });
     });
@@ -168,7 +170,7 @@ function TemplateProvider({ children }) {
           text: "Save and pay",
           onPress: () => {
             setPrematureHandledRemove(true);
-            submit(() => {
+            submit(true, () => {
               showToast({
                 message: "Saved!",
                 type: "success",
@@ -177,7 +179,7 @@ function TemplateProvider({ children }) {
               router.replace({
                 pathname: ROUTE_LIST,
                 params: {
-                  finished: true,
+                  finished: "document",
                   finishedId: id,
                 },
               });

@@ -3,7 +3,10 @@ import { api } from "./index";
 export const callGetDocumentTypes = async () => {
   console.log("callGetDocumentTypes");
   const response = await api.get("/documentType");
-  const result = response.data.items;
+  const result = response?.data?.items;
+  if (!result) {
+    return [];
+  }
   return result;
 };
 
@@ -20,10 +23,11 @@ export const callGetDocument = async (id) => {
   return result;
 };
 
-export const callUpdateDocument = async (id, name, data) => {
-  console.log("callUpdateDocument", id, name, data);
+export const callUpdateDocument = async (id, name, data, isFinished) => {
+  console.log("callUpdateDocument", id, name, data, isFinished);
   const response = await api.put(`/userDocument/${id}`, {
     docName: name,
+    finished: isFinished,
     payload: {
       userAnswers: data,
     },

@@ -1,94 +1,22 @@
 import { StripeProvider } from "@stripe/stripe-react-native";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useLocalSearchParams } from "expo-router";
 import { Check, NotepadTextDashed, Squirrel } from "lucide-react-native";
-import { forwardRef, useEffect, useState } from "react";
-import { Alert, Platform, View } from "react-native";
+import { View } from "react-native";
 import { SwipeListView } from "react-native-swipe-list-view";
-import { callDeleteDocument } from "../../../api/document";
-import { callGetMe } from "../../../api/user";
 import GradientMask from "../../../components/GradientMask";
-import Loader from "../../../components/loader";
 import Pressable from "../../../components/Pressable";
 import Text from "../../../components/Text";
-import { useToast } from "../../../components/toast";
 import Colors from "../../../constants/color";
-import FilterView from "../../../containers/list_FilterView";
-import SwipeListItem from "../../../containers/list_SwipeListItem";
+import FilterView from "../../../containers/List/FilterView";
+import HiddenItem from "../../../containers/List/HiddenItem";
+import SwipeListItem from "../../../containers/List/SwipeListItem";
+import { useList, withListProvider } from "../../../providers/list";
 
-export default function List() {
-  const [filter, setFilter] = useState({
-    searchQuery: null,
-    sort: 1,
-    type: null,
-  });
-  const { showToast } = useToast();
-  const { finished, finishedId } = useLocalSearchParams();
-  const [tab, setTab] = useState(finished ? "finished" : "drafts");
-  const { data = {}, isFetched } = useQuery({
-    queryKey: ["me"],
-    queryFn: callGetMe,
-  });
-  const queryClient = useQueryClient();
-
-  const deleteMutation = useMutation({
-    mutationFn: callDeleteDocument,
-    onSuccess: async () => {
-      await queryClient.invalidateQueries({ queryKey: ["me"] });
-      showToast({
-        message: "Document deleted",
-        type: "success",
-      });
-    },
-  });
-
-  useEffect(() => {
-    if (isFetched && finished === undefined) {
-      if (
-        data.documents.items.filter((item) => item.status !== 0).length === 0
-      ) {
-        setTab("drafts");
-      }
-    }
-  }, [finished, finishedId, isFetched]);
-
-  const RenderHiddenItem = forwardRef(({ item, tab }, ref) => {
-    if (tab === "finished") {
-      return null;
-    }
-    return (
-      <Pressable
-        ref={ref}
-        className={`items-end justify-center flex-1 pr-4 mb-4 ml-10 bg-danger ${
-          Platform.OS === "ios" ? "rounded-xl" : "rounded-3xl"
-        }`}
-        onPress={() => {
-          console.log("Deleting item", item.id);
-          Alert.alert(
-            "Delete",
-            "Are you sure you want to delete this draft? ",
-            [
-              { text: "Cancel", style: "cancel" },
-              {
-                text: "Delete",
-                onPress: () => deleteMutation.mutate(item.id),
-              },
-            ]
-          );
-        }}
-      >
-        <Text twClass="text-white">Delete</Text>
-      </Pressable>
-    );
-  });
-
-  if (!isFetched) {
-    return <Loader visible />;
-  }
+function List() {
+  const { filter, tab, setTab, data } = useList();
 
   return (
     <StripeProvider
-      publishableKey={process.env.EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY}
+      publishableKey={process.env.EXPO_PUBLIC_STRIPE_PK}
       merchantIdentifier="docpro"
       urlScheme="docpro"
     >
@@ -135,12 +63,13 @@ export default function List() {
             </View>
           </Pressable>
         </View>
-        <FilterView filter={filter} setFilter={setFilter} />
+        <FilterView />
         <View className="flex flex-row flex-1 pb-6">
           <GradientMask intensity={5}>
             <SwipeListView
               showsVerticalScrollIndicator={false}
               className="flex-1 px-6 pt-6"
+              contentContainerStyle={{ paddingBottom: 100 }}
               data={
                 data?.documents?.items &&
                 data?.documents?.items
@@ -174,7 +103,7 @@ export default function List() {
               }
               renderItem={({ item }) => <SwipeListItem item={item} />}
               renderHiddenItem={({ item }) => (
-                <RenderHiddenItem item={item} tab={tab} />
+                <HiddenItem item={item} tab={tab} />
               )}
               rightOpenValue={-75}
               disableRightSwipe
@@ -186,3 +115,5 @@ export default function List() {
     </StripeProvider>
   );
 }
+
+export default withListProvider(List);

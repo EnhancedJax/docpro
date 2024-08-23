@@ -1,14 +1,16 @@
 import { useQuery } from "@tanstack/react-query";
 import { ClockArrowDown, ClockArrowUp, Search } from "lucide-react-native";
 import { View } from "react-native";
-import { callGetDocumentTypes } from "../api/document";
-import ButtonedScrollView from "../components/ButtonedScrollView";
-import Input from "../components/Input";
-import Pressable from "../components/Pressable";
-import Text from "../components/Text";
-import Colors from "../constants/color";
+import { callGetDocumentTypes } from "../../api/document";
+import ButtonedScrollView from "../../components/ButtonedScrollView";
+import Input from "../../components/Input";
+import Pressable from "../../components/Pressable";
+import Text from "../../components/Text";
+import Colors from "../../constants/color";
+import { useList } from "../../providers/list";
 
-export default function FilterView({ filter, setFilter }) {
+export default function FilterView() {
+  const { filter, setFilter } = useList();
   const { data: documentTypes = {}, isFetched } = useQuery({
     queryKey: ["documentTypes"],
     queryFn: callGetDocumentTypes,
@@ -33,14 +35,15 @@ export default function FilterView({ filter, setFilter }) {
           <Search size={24} color={Colors.tgray} />
         </View>
         <Pressable
-          className="p-4 ml-2 rounded-full bg-gray"
           onPress={() => setFilter({ ...filter, sort: filter.sort * -1 })}
         >
-          {filter.sort === 1 ? (
-            <ClockArrowDown size={24} color={Colors.tgray} />
-          ) : (
-            <ClockArrowUp size={24} color={Colors.tgray} />
-          )}
+          <View className="flex items-center justify-center p-4 ml-2 rounded-full bg-gray">
+            {filter.sort === 1 ? (
+              <ClockArrowDown size={24} color={Colors.tgray} />
+            ) : (
+              <ClockArrowUp size={24} color={Colors.tgray} />
+            )}
+          </View>
         </Pressable>
       </View>
       <ButtonedScrollView arrowOffset={-24}>
