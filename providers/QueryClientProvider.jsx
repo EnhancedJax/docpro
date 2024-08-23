@@ -26,7 +26,7 @@ export default function QueryClientProvider({ children }) {
     }
 
     const refreshToken = await AsyncStorage.getItem(REFRESH_TOKEN_KEY);
-    if (!refreshToken) return false;
+    if (!refreshToken) return true;
 
     console.log("--> Creating new refresh promise");
     refreshPromiseRef.current = (async () => {
@@ -47,7 +47,7 @@ export default function QueryClientProvider({ children }) {
         });
         hideLoader();
         router.replace(ROUTE_LOGIN);
-        return false;
+        return true;
       } finally {
         refreshPromiseRef.current = null;
       }

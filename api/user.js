@@ -6,7 +6,9 @@ export const callGetMe = async () => {
   const { data } = responseData;
   const info = data.info;
   const { editable, completed, paid } = data.userDocs;
-  const items = [...editable, ...completed, ...paid];
+  const items = [...editable, ...completed, ...paid].filter(
+    (item) => item.docName !== ""
+  );
   const result = {
     email: data?.email || "",
     name: data?.info?.name || "",
