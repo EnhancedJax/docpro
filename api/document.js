@@ -53,3 +53,17 @@ export const callDeleteDocument = async (id) => {
   const response = await api.delete(`/userDocument/${id}`);
   return response;
 };
+
+export const callGetDocumentBuffer = async (id) => {
+  console.log("callGetDocumentUrl", id);
+  const response = await api.get(`/userDocument/download/?docId=${id}`);
+  const buffer = response.data.pdfbuffer.data;
+  return buffer;
+};
+
+export const callGetDocumentUrl = async (id) => {
+  console.log("callGetDocumentUrl", id);
+  const response = await api.get(`/userDocument/download/?docId=${id}`);
+  const url = response.data.url;
+  return "https://pdfobject.com/pdf/sample.pdf";
+};

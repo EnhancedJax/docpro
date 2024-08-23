@@ -56,6 +56,7 @@ function LoginProvider({ children }) {
       email: data.email,
       password: data.password,
     };
+    Keyboard.dismiss();
     login(credentials, () => {
       showToast({
         message: "Login successful!",

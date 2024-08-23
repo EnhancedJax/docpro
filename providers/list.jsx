@@ -1,15 +1,16 @@
 import { usePaymentSheet } from "@stripe/stripe-react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import * as Linking from "expo-linking";
 import { router, useLocalSearchParams } from "expo-router";
-import * as WebBrowser from "expo-web-browser";
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { Alert, Linking, Platform } from "react-native";
-import { callDeleteDocument } from "../api/document";
+import { Alert } from "react-native";
+import { callDeleteDocument, callGetDocumentBuffer } from "../api/document";
 import { callNewPayment } from "../api/payment";
 import { callGetMe } from "../api/user";
 import { useLoader } from "../components/loader";
 import { useToast } from "../components/toast";
 import { ROUTE_LISTEN } from "../constants/routes";
+import { saveAndGetUri } from "../utils/pdf";
 
 const ListContext = createContext();
 export const useList = () => useContext(ListContext);
@@ -85,16 +86,35 @@ function ListProvider({ children }) {
     }
   };
 
-  const openPDFFile = (documentId, showPopup = false) => {
+  const openPDFFile = async (documentId, showPopup = false) => {
     console.log("openPDFFile", documentId);
-    const url = "https://pdfobject.com/pdf/sample.pdf";
 
     const openPDF = async () => {
-      if (Platform.OS === "ios") {
-        WebBrowser.dismissBrowser();
-        WebBrowser.openBrowserAsync(url);
-      } else {
-        await Linking.openURL(url);
+      try {
+        const buffer = await queryClient.fetchQuery({
+          queryKey: ["getDocumentBuffer", documentId],
+          queryFn: () => callGetDocumentBuffer(documentId),
+        });
+        const fileUri = await saveAndGetUri(buffer);
+        // console.log("fileUri", fileUri);
+        Linking.openURL(fileUri);
+        // Sharing.shareAsync(fileUri, {
+        //   UTI: ".pdf",
+        //   mimeType: "application/pdf",
+        // });
+      } catch (error) {
+        const message = error.response?.data?.message || error.message;
+        if (!message) {
+          showToast({
+            message: "Unable to convert to PDF file from buffer",
+            type: "error",
+          });
+        } else {
+          showToast({
+            message,
+            type: "error",
+          });
+        }
       }
     };
 
