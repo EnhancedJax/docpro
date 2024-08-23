@@ -1,13 +1,14 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { ArrowRight, Cog } from "lucide-react-native";
+import { useEffect } from "react";
 import { ScrollView, View } from "react-native";
 import {
   callCreateDocument,
   callGetDocumentTypes,
 } from "../../../api/document";
 import GradientMask from "../../../components/GradientMask";
-import Loader from "../../../components/loader";
+import { useLoader } from "../../../components/loader";
 import Pressable from "../../../components/Pressable";
 import Text from "../../../components/Text";
 import Colors from "../../../constants/color";
@@ -15,10 +16,24 @@ import { ROUTE_SETTINGS, ROUTE_TEMPLATE } from "../../../constants/routes";
 
 export default function New() {
   const queryClient = useQueryClient();
-  const { data: documentTypes = [], isFetched } = useQuery({
+  const { showLoader, hideLoader } = useLoader();
+  const {
+    data: documentTypes = [],
+    isFetching,
+    isLoading,
+  } = useQuery({
     queryKey: ["documentTypes"],
     queryFn: callGetDocumentTypes,
   });
+
+  useEffect(() => {
+    if (isFetching || isLoading) {
+      showLoader();
+    } else {
+      hideLoader();
+    }
+  }, [isFetching, isLoading]);
+
   const newDocumentMutation = useMutation({
     mutationFn: callCreateDocument,
     onSuccess: async (data, { newDocumentNamePlaceholder }) => {
@@ -29,10 +44,6 @@ export default function New() {
       });
     },
   });
-
-  if (!isFetched) {
-    return <Loader visible />;
-  }
 
   return (
     <View className="flex-col flex-1 pt-8 bg-white border-b border-neutral-200">

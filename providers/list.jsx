@@ -1,6 +1,5 @@
 import { usePaymentSheet } from "@stripe/stripe-react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import * as Linking from "expo-linking";
 import { router, useLocalSearchParams } from "expo-router";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { Alert } from "react-native";
@@ -10,7 +9,7 @@ import { callGetMe } from "../api/user";
 import { useLoader } from "../components/loader";
 import { useToast } from "../components/toast";
 import { ROUTE_LISTEN } from "../constants/routes";
-import { saveAndGetUri } from "../utils/pdf";
+import { saveAndGetUri, savePDF } from "../utils/pdf";
 
 const ListContext = createContext();
 export const useList = () => useContext(ListContext);
@@ -90,18 +89,15 @@ function ListProvider({ children }) {
     console.log("openPDFFile", documentId);
 
     const openPDF = async () => {
+      showLoader();
       try {
-        const buffer = await queryClient.fetchQuery({
+        const response = await queryClient.fetchQuery({
           queryKey: ["getDocumentBuffer", documentId],
           queryFn: () => callGetDocumentBuffer(documentId),
         });
+        const buffer = response.data.pdfbuffer.data;
         const fileUri = await saveAndGetUri(buffer);
-        // console.log("fileUri", fileUri);
-        Linking.openURL(fileUri);
-        // Sharing.shareAsync(fileUri, {
-        //   UTI: ".pdf",
-        //   mimeType: "application/pdf",
-        // });
+        await savePDF(fileUri);
       } catch (error) {
         const message = error.response?.data?.message || error.message;
         if (!message) {
@@ -115,6 +111,8 @@ function ListProvider({ children }) {
             type: "error",
           });
         }
+      } finally {
+        hideLoader();
       }
     };
 

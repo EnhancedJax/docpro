@@ -31,61 +31,64 @@ function Template() {
 
   return (
     <View className="flex-col flex-1 border-t border-b border-neutral-300">
-      <View className={`flex-row p-6 ${isKeyboardOpen ? "hidden" : ""}`}>
-        <Button
-          type="secondary"
-          onPress={
-            Object.keys(errors).length > 0
-              ? () => {
-                  showToast({
-                    message: "Please make sure there are no errors.",
-                    type: "info",
-                  });
-                  setGoToIndex(parseInt(Object.keys(errors)[0]));
-                }
-              : handleSaveAsDraft
-          }
-          className="flex-1 mr-2"
-        >
-          Save Draft
-        </Button>
-        <Button
-          type={
-            (progress === questionItem.length && isValid) ||
-            (progress > activeIndex && activeIndex < questionItem.length - 1)
-              ? "primary"
-              : "inactive"
-          }
-          onPress={
-            activeIndex === questionItem.length - 1 && isValid
-              ? handleSaveAndPay
-              : progress > activeIndex && activeIndex < questionItem.length - 1
-              ? () => {
-                  setGoToIndex(activeIndex + 1);
-                }
-              : activeIndex < questionItem.length - 1
-              ? () => {
-                  showToast({
-                    message: "Please answer this question first.",
-                    type: "info",
-                  });
-                }
-              : () => {
-                  showToast({
-                    message: "Please answer all questions.",
-                    type: "info",
-                  });
-                  if (Object.keys(errors).length > 0) {
+      {!isKeyboardOpen && (
+        <View className="flex-row p-6">
+          <Button
+            type="secondary"
+            onPress={
+              Object.keys(errors).length > 0
+                ? () => {
+                    showToast({
+                      message: "Please make sure there are no errors.",
+                      type: "info",
+                    });
                     setGoToIndex(parseInt(Object.keys(errors)[0]));
                   }
-                }
-          }
-          allowAction
-          className="flex-1 ml-2"
-        >
-          {activeIndex === questionItem.length - 1 ? "Save & pay" : "Next"}
-        </Button>
-      </View>
+                : handleSaveAsDraft
+            }
+            className="flex-1 mr-2"
+          >
+            Save Draft
+          </Button>
+          <Button
+            type={
+              (progress === questionItem.length && isValid) ||
+              (progress > activeIndex && activeIndex < questionItem.length - 1)
+                ? "primary"
+                : "inactive"
+            }
+            onPress={
+              activeIndex === questionItem.length - 1 && isValid
+                ? handleSaveAndPay
+                : progress > activeIndex &&
+                  activeIndex < questionItem.length - 1
+                ? () => {
+                    setGoToIndex(activeIndex + 1);
+                  }
+                : activeIndex < questionItem.length - 1
+                ? () => {
+                    showToast({
+                      message: "Please answer this question first.",
+                      type: "info",
+                    });
+                  }
+                : () => {
+                    showToast({
+                      message: "Please answer all questions.",
+                      type: "info",
+                    });
+                    if (Object.keys(errors).length > 0) {
+                      setGoToIndex(parseInt(Object.keys(errors)[0]));
+                    }
+                  }
+            }
+            allowAction
+            className="flex-1 ml-2"
+          >
+            {activeIndex === questionItem.length - 1 ? "Save & pay" : "Next"}
+          </Button>
+        </View>
+      )}
       <CardCarousel
         activeIndex={activeIndex}
         setActiveIndex={setActiveIndex}

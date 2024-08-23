@@ -5,7 +5,7 @@ export const FIELDS = [
     displayName: "Name",
     key: "name",
     min: 1,
-    max: 100,
+    max: 40,
   },
   {
     question: "What's your date of birth?",

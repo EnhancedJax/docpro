@@ -51,11 +51,17 @@ function SignupProvider({ children }) {
   };
 
   const onInvalid = () => {
-    setGoToIndex(0);
     showToast({
       message: "Please answer all questions.",
       type: "error",
     });
+    const index = FIELDS.findIndex(
+      (field) =>
+        errors[Object.keys(errors)[0]] && field.key === Object.keys(errors)[0]
+    );
+    if (Object.keys(errors).length > 0) {
+      setGoToIndex(index);
+    }
   };
 
   const onSubmit = async (data) => {

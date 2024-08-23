@@ -55,10 +55,8 @@ export const callDeleteDocument = async (id) => {
 };
 
 export const callGetDocumentBuffer = async (id) => {
-  console.log("callGetDocumentUrl", id);
-  const response = await api.get(`/userDocument/download/?docId=${id}`);
-  const buffer = response.data.pdfbuffer.data;
-  return buffer;
+  console.log("callGetDocumentBuffer", id);
+  return await api.get(`/userDocument/download/?docId=${id}`);
 };
 
 export const callGetDocumentUrl = async (id) => {

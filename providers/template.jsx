@@ -55,6 +55,7 @@ function TemplateProvider({ children }) {
   const { data, isLoading } = useQuery({
     queryKey: ["document", id],
     queryFn: () => callGetDocument(id),
+    staleTime: 0,
   });
 
   useEffect(() => {
@@ -100,6 +101,7 @@ function TemplateProvider({ children }) {
   });
 
   const deleteMutation = useMutation({
+    retry: 2,
     mutationFn: () => callDeleteDocument(id),
     onSuccess: async (response, { isBeforeRemove }) => {
       await queryClient.invalidateQueries({ queryKey: ["me"] });
@@ -108,6 +110,12 @@ function TemplateProvider({ children }) {
       }
       router.replace({
         pathname: ROUTE_HOME,
+      });
+    },
+    onError: (error) => {
+      showToast({
+        message: "Failed to delete document",
+        type: "error",
       });
     },
   });
@@ -137,10 +145,10 @@ function TemplateProvider({ children }) {
     const data = getValues();
     const name = data["0"];
     if (!name) {
+      await deleteMutation.mutate(isBeforeRemove);
       showToast({
-        message: "Draft discarded",
+        message: "Empty draft discarded",
       });
-      deleteMutation.mutate(isBeforeRemove);
       return;
     }
 

@@ -54,6 +54,7 @@ function Signup() {
         activeIndex={progress}
         setActiveIndex={setProgress}
         goToIndex={goToIndex}
+        onFinishGo={() => setGoToIndex(null)}
       >
         {FIELDS.map((question, index) => (
           <QuestionCard

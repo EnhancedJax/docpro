@@ -106,6 +106,7 @@ function List() {
                 <HiddenItem item={item} tab={tab} />
               )}
               rightOpenValue={-75}
+              disableLeftSwipe={tab === "finished"}
               disableRightSwipe
               keyExtractor={(item) => item.id}
             />

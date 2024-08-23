@@ -1,4 +1,4 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { createContext, useContext } from "react";
 import { callLoginUser, callLogoutUser, callSignupUser } from "../api/auth";
@@ -11,6 +11,7 @@ export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
   const { showToast } = useToast();
+  const queryClient = useQueryClient();
 
   //#region Mutations
 
@@ -28,6 +29,7 @@ export const AuthProvider = ({ children }) => {
     onSuccess: async (response, { successCallback }) => {
       const accessToken = response.data.accessToken;
       const refreshToken = response.data.refreshToken;
+      queryClient.invalidateQueries();
       await newSession(accessToken, refreshToken);
       router.replace(ROUTE_ENTRY);
       successCallback();
@@ -40,21 +42,20 @@ export const AuthProvider = ({ children }) => {
     onSuccess: async (response, { successCallback }) => {
       const accessToken = response?.data?.accessToken;
       const refreshToken = response?.data?.refreshToken;
+      queryClient.invalidateQueries();
       await newSession(accessToken, refreshToken);
-      router.replace(ROUTE_HOME);
       successCallback();
     },
   });
 
   const logoutMutation = useMutation({
     mutationFn: callLogoutUser,
-    onSettled: async () => {
-      removeSession();
-    },
     onSuccess: async (data, { successCallback }) => {
+      await removeSession();
       successCallback();
     },
-    onError: () => {
+    onError: async () => {
+      await removeSession();
       router.replace(ROUTE_HOME);
       showToast({
         message: "Please sign in again",
