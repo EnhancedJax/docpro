@@ -9,7 +9,7 @@ import { useCallback, useRef, useState } from "react";
 import { callRefreshToken } from "../api/auth";
 import { useLoader } from "../components/loader";
 import { useToast } from "../components/toast";
-import { REFRESH_TOKEN_KEY, STALE_TIME } from "../constants";
+import { REFRESH_TOKEN_KEY } from "../constants";
 import { ROUTE_LOGIN } from "../constants/routes";
 import { newSession, removeSession } from "../utils/session";
 
@@ -69,7 +69,7 @@ export default function QueryClientProvider({ children }) {
               }
               return failureCount <= 1;
             },
-            staleTime: STALE_TIME,
+            // staleTime: STALE_TIME,
           },
           mutations: {
             retry: async (failureCount, error) => {
