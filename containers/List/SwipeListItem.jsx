@@ -30,6 +30,7 @@ export default function SwipeListItem({ item }) {
             break;
         }
       }}
+      cooldown={1000}
     >
       <View className="flex flex-row items-center">
         <View className="flex-1 ml-4">

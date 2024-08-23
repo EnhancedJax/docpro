@@ -1,14 +1,14 @@
+import { usePaymentSheet } from "@stripe/stripe-react-native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useState } from "react";
+import * as WebBrowser from "expo-web-browser";
+import React, { createContext, useContext, useEffect, useState } from "react";
+import { Alert, Linking, Platform } from "react-native";
 import { callDeleteDocument } from "../api/document";
-import { callGetMe } from "../api/user";
-import { useToast } from "../components/toast";
-
-import { usePaymentSheet } from "@stripe/stripe-react-native";
-import React, { createContext, useContext } from "react";
 import { callNewPayment } from "../api/payment";
+import { callGetMe } from "../api/user";
 import { useLoader } from "../components/loader";
+import { useToast } from "../components/toast";
 import { ROUTE_LISTEN } from "../constants/routes";
 
 const ListContext = createContext();
@@ -30,6 +30,9 @@ function ListProvider({ children }) {
     queryKey: ["me"],
     queryFn: callGetMe,
   });
+  const [paymentInProgress, setPaymentInProgress] = useState(false);
+
+  //#region APIs
 
   const deleteMutation = useMutation({
     mutationFn: callDeleteDocument,
@@ -42,8 +45,12 @@ function ListProvider({ children }) {
     },
   });
 
+  //#region Callbacks
+
   const newPayment = async (documentId) => {
+    if (paymentInProgress) return;
     try {
+      setPaymentInProgress(true);
       showLoader();
       const data = await queryClient.fetchQuery({
         queryKey: ["newPayment", documentId],
@@ -74,12 +81,48 @@ function ListProvider({ children }) {
       console.log(error.message);
     } finally {
       hideLoader();
+      setPaymentInProgress(false);
     }
   };
 
-  const openPDFFile = (documentId) => {
+  const openPDFFile = (documentId, showPopup = false) => {
     console.log("openPDFFile", documentId);
+    const url = "https://pdfobject.com/pdf/sample.pdf";
+
+    const openPDF = async () => {
+      if (Platform.OS === "ios") {
+        WebBrowser.dismissBrowser();
+        WebBrowser.openBrowserAsync(url);
+      } else {
+        await Linking.openURL(url);
+      }
+    };
+
+    if (showPopup) {
+      Alert.alert("Payment success!", "Do you want to view the PDF file now?", [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "Open",
+          onPress: openPDF,
+        },
+      ]);
+    } else {
+      openPDF();
+    }
   };
+
+  const resetFilters = () => {
+    setFilter({
+      searchQuery: null,
+      sort: 1,
+      type: null,
+    });
+  };
+
+  //#region useEffects
 
   useEffect(() => {
     showLoader();
@@ -101,10 +144,11 @@ function ListProvider({ children }) {
       const isFinishedPayment = finished === "payment";
       setTab(isFinishedDocument || isFinishedPayment ? "finished" : "drafts"); // if finished is payment, it will be redirect to finished
       if (isFinishedDocument) {
+        resetFilters();
         newPayment(finishedId);
       }
       if (isFinishedPayment) {
-        openPDFFile(finishedId);
+        openPDFFile(finishedId, true);
       }
     }
   }, [finished, finishedId, isFetched]);
