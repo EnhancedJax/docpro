@@ -1,7 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Redirect } from "expo-router";
+import { Redirect, SplashScreen } from "expo-router";
 import { useEffect, useState } from "react";
-import Loader from "../components/loader";
 import { ACCESS_TOKEN_KEY } from "../constants";
 import { ROUTE_HOME, ROUTE_LOGIN } from "../constants/routes";
 
@@ -17,8 +16,12 @@ export default function Index() {
   }, []);
 
   if (redirectTo === null) {
-    return <Loader visible />;
+    return null;
   }
+
+  setTimeout(() => {
+    SplashScreen.hideAsync();
+  }, 100);
 
   return <Redirect href={redirectTo} />;
 }

@@ -5,7 +5,7 @@ import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Keyboard } from "react-native";
 import { callUpdateEmail, callUpdateMe, callUpdatePassword } from "../api/user";
-import { useToast } from "../components/toast";
+import { useToast } from "../components/Toast/provider";
 import { ROUTE_LOGIN } from "../constants/routes";
 import { FIELDS } from "../constants/user";
 import { emailSchema, passwordSchema } from "../schema/edit";

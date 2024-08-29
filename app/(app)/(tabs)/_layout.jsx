@@ -76,7 +76,7 @@ export default function RootLayout() {
       }}
       tabBar={(props) => <CustomTabBar {...props} />}
     >
-      <Tabs.Screen name="index" />
+      <Tabs.Screen name="index" options={{ animation: "none" }} />
       <Tabs.Screen name="list" options={{ headerStatusBarHeight: 0 }} />
     </Tabs>
   );

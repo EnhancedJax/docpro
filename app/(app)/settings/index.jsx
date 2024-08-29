@@ -8,7 +8,7 @@ import Button from "../../../components/Button";
 import Loader from "../../../components/loader";
 import Pressable from "../../../components/Pressable";
 import Text from "../../../components/Text";
-import { useToast } from "../../../components/toast";
+import { useToast } from "../../../components/Toast/provider";
 import Colors from "../../../constants/color";
 import { ROUTE_LOGIN, ROUTE_SETTINGS_EDIT } from "../../../constants/routes";
 import { EMAIL_FIELD, FIELDS } from "../../../constants/user";

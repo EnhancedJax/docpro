@@ -2,8 +2,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { createContext, useContext } from "react";
 import { callLoginUser, callLogoutUser, callSignupUser } from "../api/auth";
-import { useToast } from "../components/toast";
-import { ROUTE_ENTRY, ROUTE_HOME } from "../constants/routes";
+import { useToast } from "../components/Toast/provider";
+import { ROUTE_HOME } from "../constants/routes";
 import { newSession, removeSession } from "../utils/session";
 
 const AuthContext = createContext(null);
@@ -31,7 +31,7 @@ export const AuthProvider = ({ children }) => {
       const refreshToken = response.data.refreshToken;
       queryClient.invalidateQueries();
       await newSession(accessToken, refreshToken);
-      router.replace(ROUTE_ENTRY);
+      router.replace(ROUTE_HOME);
       successCallback();
     },
   });

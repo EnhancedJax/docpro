@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import { View } from "react-native";
 import { callPaymentStatus } from "../../api/payment";
 import Text from "../../components/Text";
-import { useToast } from "../../components/toast";
+import { useToast } from "../../components/Toast/provider";
 import Colors from "../../constants/color";
 import { ROUTE_LIST } from "../../constants/routes";
 // import PDFViewer from "../../components/PDFViewer";

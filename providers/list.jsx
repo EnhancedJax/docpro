@@ -7,7 +7,7 @@ import { callDeleteDocument, callGetDocumentBuffer } from "../api/document";
 import { callNewPayment } from "../api/payment";
 import { callGetMe } from "../api/user";
 import { useLoader } from "../components/loader";
-import { useToast } from "../components/toast";
+import { useToast } from "../components/Toast/provider";
 import { ROUTE_LISTEN } from "../constants/routes";
 import { saveAndGetUri, savePDF } from "../utils/pdf";
 

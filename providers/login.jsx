@@ -4,7 +4,7 @@ import { createContext, useContext, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Keyboard } from "react-native";
 import { callCheckEmail } from "../api/auth";
-import { useToast } from "../components/toast";
+import { useToast } from "../components/Toast/provider";
 import { ROUTE_SIGNUP } from "../constants/routes";
 import { useAuth } from "../providers/auth";
 import { schema } from "../schema/login";

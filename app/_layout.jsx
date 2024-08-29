@@ -21,7 +21,7 @@ import {
   TouchableWithoutFeedback,
 } from "react-native";
 import { LoaderProvider } from "../components/loader";
-import { ToastProvider } from "../components/toast";
+import { ToastProvider } from "../components/Toast/provider";
 import { AuthProvider } from "../providers/auth";
 import QueryClientProvider from "../providers/QueryClientProvider";
 import "./global.css";
@@ -44,10 +44,6 @@ export default function RootLayout() {
     return null;
   }
 
-  SplashScreen.hideAsync();
-  if (Platform.OS === "android") {
-    NavigationBar.setBackgroundColorAsync("transparent");
-  }
   if (Platform.OS === "android") {
     NavigationBar.setBackgroundColorAsync("transparent");
   }
@@ -71,10 +67,17 @@ export default function RootLayout() {
                 >
                   <Stack screenOptions={{ headerShown: false }}>
                     <Stack.Screen name="index" />
-                    <Stack.Screen name="login" />
+                    <Stack.Screen
+                      name="login"
+                      options={{ animation: "none" }}
+                    />
                     <Stack.Screen
                       name="signup"
                       options={{ presentation: "containedModal" }}
+                    />
+                    <Stack.Screen
+                      name="(app)"
+                      options={{ animation: "none" }}
                     />
                   </Stack>
                 </KeyboardAvoidingView>

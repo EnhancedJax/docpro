@@ -8,7 +8,7 @@ import { router } from "expo-router";
 import { useCallback, useRef, useState } from "react";
 import { callRefreshToken } from "../api/auth";
 import { useLoader } from "../components/loader";
-import { useToast } from "../components/toast";
+import { useToast } from "../components/Toast/provider";
 import { REFRESH_TOKEN_KEY } from "../constants";
 import { ROUTE_LOGIN } from "../constants/routes";
 import { newSession, removeSession } from "../utils/session";
@@ -26,7 +26,7 @@ export default function QueryClientProvider({ children }) {
     }
 
     const refreshToken = await AsyncStorage.getItem(REFRESH_TOKEN_KEY);
-    if (!refreshToken) return true;
+    if (!refreshToken) return false;
 
     console.log("--> Creating new refresh promise");
     refreshPromiseRef.current = (async () => {
@@ -37,7 +37,7 @@ export default function QueryClientProvider({ children }) {
         const newRefreshToken = response.data.data.refreshToken;
         console.log("--> Refresh success");
         await newSession(accessToken, newRefreshToken);
-        return true;
+        return false;
       } catch (error) {
         console.log("--> Refresh failed", error);
         await removeSession();
@@ -47,7 +47,7 @@ export default function QueryClientProvider({ children }) {
         });
         hideLoader();
         router.replace(ROUTE_LOGIN);
-        return true;
+        return false;
       } finally {
         refreshPromiseRef.current = null;
       }

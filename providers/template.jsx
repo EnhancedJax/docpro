@@ -18,7 +18,7 @@ import {
   callUpdateDocument,
 } from "../api/document";
 import { useLoader } from "../components/loader";
-import { useToast } from "../components/toast";
+import { useToast } from "../components/Toast/provider";
 import { ROUTE_HOME, ROUTE_LIST } from "../constants/routes";
 import { generateSchema } from "../utils/template";
 
